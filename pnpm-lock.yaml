@@ -23,6 +23,9 @@ importers:
       '@virtue/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@virtue/continuity-engine':
+        specifier: workspace:*
+        version: link:../../packages/continuity-engine
       '@virtue/director-engine':
         specifier: workspace:*
         version: link:../../packages/director-engine
@@ -146,6 +149,19 @@ importers:
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.37
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
+  packages/continuity-engine:
+    dependencies:
+      '@virtue/types':
+        specifier: workspace:*
+        version: link:../types
+      '@virtue/validation':
+        specifier: workspace:*
+        version: link:../validation
+    devDependencies:
       typescript:
         specifier: ^5.5.0
         version: 5.9.3

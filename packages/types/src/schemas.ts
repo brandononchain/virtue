@@ -30,13 +30,57 @@ export type VirtueAsset = z.infer<typeof VirtueAssetSchema>;
 // ─── Character ───────────────────────────────────────────
 export const VirtueCharacterSchema = z.object({
   id: z.string(),
+  projectId: z.string(),
   name: z.string(),
   description: z.string().default(""),
   appearance: z.string().default(""),
+  clothing: z.string().default(""),
+  age: z.string().default(""),
+  gender: z.string().default(""),
+  ethnicity: z.string().optional(),
   voiceNotes: z.string().default(""),
-  referenceAssets: z.array(z.string()).default([]),
+  visualReferenceAssets: z.array(z.string()).default([]),
+  styleTags: z.array(z.string()).default([]),
 });
 export type VirtueCharacter = z.infer<typeof VirtueCharacterSchema>;
+
+// ─── Environment ────────────────────────────────────────
+export const VirtueEnvironmentSchema = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  name: z.string(),
+  description: z.string().default(""),
+  locationType: z.string().default(""),
+  timeOfDay: z.string().default("day"),
+  weather: z.string().default(""),
+  lightingStyle: z.string().default(""),
+  colorPalette: z.array(z.string()).default([]),
+  visualReferenceAssets: z.array(z.string()).default([]),
+});
+export type VirtueEnvironment = z.infer<typeof VirtueEnvironmentSchema>;
+
+// ─── Prop ───────────────────────────────────────────────
+export const VirtuePropSchema = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  name: z.string(),
+  description: z.string().default(""),
+  material: z.string().default(""),
+  condition: z.string().default(""),
+  usageNotes: z.string().default(""),
+  visualReferenceAssets: z.array(z.string()).default([]),
+});
+export type VirtueProp = z.infer<typeof VirtuePropSchema>;
+
+// ─── Scene Context ──────────────────────────────────────
+export const SceneContextSchema = z.object({
+  environmentId: z.string().optional(),
+  activeCharacterIds: z.array(z.string()).default([]),
+  activePropIds: z.array(z.string()).default([]),
+  lightingIntent: z.string().default(""),
+  moodIntent: z.string().default(""),
+});
+export type SceneContext = z.infer<typeof SceneContextSchema>;
 
 // ─── Shot ────────────────────────────────────────────────
 export const VirtueShotSchema = z.object({
@@ -55,6 +99,8 @@ export const VirtueShotSchema = z.object({
   lighting: z.string().default("natural"),
   skills: z.array(z.string()).default([]),
   characterIds: z.array(z.string()).default([]),
+  propIds: z.array(z.string()).default([]),
+  continuityOverride: z.string().optional(),
   renderJobId: z.string().optional(),
 });
 export type VirtueShot = z.infer<typeof VirtueShotSchema>;
@@ -71,6 +117,7 @@ export const VirtueSceneSchema = z.object({
   mood: z.string().default(""),
   shots: z.array(VirtueShotSchema).default([]),
   characters: z.array(z.string()).default([]),
+  context: SceneContextSchema.optional(),
 });
 export type VirtueScene = z.infer<typeof VirtueSceneSchema>;
 
@@ -157,6 +204,8 @@ export const VirtueProjectSchema = z.object({
   screenplay: z.string().default(""),
   scenes: z.array(VirtueSceneSchema).default([]),
   characters: z.array(VirtueCharacterSchema).default([]),
+  environments: z.array(VirtueEnvironmentSchema).default([]),
+  props: z.array(VirtuePropSchema).default([]),
   assets: z.array(VirtueAssetSchema).default([]),
   timeline: VirtueTimelineSchema.optional(),
   provider: z.enum(["mock", "luma", "openai", "google"]).default("mock"),

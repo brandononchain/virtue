@@ -32,6 +32,7 @@ export function seedMockData() {
     lighting: "neon + volumetric fog",
     skills: ["skill-cinematic-direction", "skill-camera-choreography", "skill-lighting-design"],
     characterIds: [],
+    propIds: [],
   });
 
   neonCity = addShot(neonCity, neonCity.scenes[0].id, {
@@ -44,6 +45,7 @@ export function seedMockData() {
     lighting: "neon reflections + practical",
     skills: ["skill-scene-simulation", "skill-lighting-design", "skill-visual-style-engine"],
     characterIds: [],
+    propIds: [],
   });
 
   neonCity = addScene(neonCity, "The Awakening", {
@@ -63,6 +65,7 @@ export function seedMockData() {
     lighting: "single key, cold blue",
     skills: ["skill-character-performance", "skill-temporal-consistency"],
     characterIds: [],
+    propIds: [],
   });
 
   neonCity = addShot(neonCity, neonCity.scenes[1].id, {
@@ -75,6 +78,7 @@ export function seedMockData() {
     lighting: "chiaroscuro, single shaft",
     skills: ["skill-character-performance", "skill-cinematic-direction", "skill-physics-engine"],
     characterIds: [],
+    propIds: [],
   });
 
   neonCity = addScene(neonCity, "The Chase", {
@@ -94,6 +98,7 @@ export function seedMockData() {
     lighting: "mixed neon + practicals",
     skills: ["skill-camera-choreography", "skill-physics-engine", "skill-temporal-consistency"],
     characterIds: [],
+    propIds: [],
   });
 
   store.saveProject(neonCity);
@@ -121,6 +126,7 @@ export function seedMockData() {
     lighting: "golden hour, backlit",
     skills: ["skill-cinematic-direction", "skill-lighting-design", "skill-visual-style-engine"],
     characterIds: [],
+    propIds: [],
   });
 
   desert = addShot(desert, desert.scenes[0].id, {
@@ -133,6 +139,7 @@ export function seedMockData() {
     lighting: "golden hour side light",
     skills: ["skill-physics-engine", "skill-temporal-consistency"],
     characterIds: [],
+    propIds: [],
   });
 
   store.saveProject(desert);
@@ -160,6 +167,7 @@ export function seedMockData() {
     lighting: "natural diffused",
     skills: ["skill-scene-simulation", "skill-camera-choreography", "skill-cinematic-direction"],
     characterIds: [],
+    propIds: [],
   });
 
   store.saveProject(glass);

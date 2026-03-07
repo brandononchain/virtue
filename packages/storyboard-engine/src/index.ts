@@ -14,6 +14,8 @@ export function createProject(name: string, description = ""): VirtueProject {
     screenplay: "",
     scenes: [],
     characters: [],
+    environments: [],
+    props: [],
     assets: [],
     provider: "mock",
     createdAt: now,

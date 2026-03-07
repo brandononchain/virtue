@@ -50,11 +50,26 @@ export default function ProjectDetailPage() {
     api.listProviders().then(setProviders).catch(() => {});
   }, [id]);
 
-  // When selecting a shot, populate the prompt field
+  // Enriched prompt state
+  const [enrichedPrompt, setEnrichedPrompt] = useState<string>("");
+  const [continuityFragment, setContinuityFragment] = useState<string>("");
+
+  // When selecting a shot, fetch enriched prompt
   useEffect(() => {
-    if (selectedShot) {
-      setRenderPrompt(selectedShot.shot.prompt || selectedShot.shot.description);
+    if (selectedShot && project) {
       setRenderStatus(null);
+      api
+        .getEnrichedPrompt(project.id, selectedShot.scene.id, selectedShot.shot.id)
+        .then((result) => {
+          setRenderPrompt(result.enrichedPrompt);
+          setEnrichedPrompt(result.enrichedPrompt);
+          setContinuityFragment(result.continuityFragment);
+        })
+        .catch(() => {
+          setRenderPrompt(selectedShot.shot.prompt || selectedShot.shot.description);
+          setEnrichedPrompt("");
+          setContinuityFragment("");
+        });
     }
   }, [selectedShot?.shot.id]);
 
@@ -181,10 +196,12 @@ export default function ProjectDetailPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-5 gap-3">
           <MiniStat label="Scenes" value={project.scenes.length} />
           <MiniStat label="Shots" value={totalShots} />
-          <MiniStat label="Characters" value={project.characters.length} />
+          <MiniStat label="Characters" value={project.characters?.length ?? 0} />
+          <MiniStat label="Environments" value={project.environments?.length ?? 0} />
+          <MiniStat label="Props" value={project.props?.length ?? 0} />
         </div>
 
         {/* Scenes */}
@@ -265,7 +282,7 @@ export default function ProjectDetailPage() {
                       <p className="text-sm font-medium text-zinc-200">
                         {scene.title}
                       </p>
-                      <div className="flex gap-3 mt-0.5">
+                      <div className="flex gap-3 mt-0.5 flex-wrap">
                         {scene.location && (
                           <span className="text-[10px] text-zinc-600">
                             {scene.location}
@@ -274,6 +291,21 @@ export default function ProjectDetailPage() {
                         {scene.mood && (
                           <span className="text-[10px] text-zinc-600">
                             {scene.mood}
+                          </span>
+                        )}
+                        {scene.context?.environmentId && (
+                          <span className="text-[10px] text-emerald-600">
+                            env: {project.environments?.find(e => e.id === scene.context?.environmentId)?.name ?? "?"}
+                          </span>
+                        )}
+                        {(scene.context?.activeCharacterIds?.length ?? 0) > 0 && (
+                          <span className="text-[10px] text-blue-600">
+                            {scene.context!.activeCharacterIds.length} char{scene.context!.activeCharacterIds.length !== 1 ? "s" : ""}
+                          </span>
+                        )}
+                        {(scene.context?.activePropIds?.length ?? 0) > 0 && (
+                          <span className="text-[10px] text-amber-600">
+                            {scene.context!.activePropIds.length} prop{scene.context!.activePropIds.length !== 1 ? "s" : ""}
                           </span>
                         )}
                       </div>
@@ -550,6 +582,20 @@ export default function ProjectDetailPage() {
                 placeholder="Enter generation prompt..."
               />
             </div>
+
+            {/* Continuity Context */}
+            {continuityFragment && (
+              <div>
+                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                  Continuity Context
+                </label>
+                <div className="bg-emerald-950/20 border border-emerald-900/30 rounded-md p-3">
+                  <p className="text-[11px] text-emerald-400/80 leading-relaxed font-mono">
+                    {continuityFragment}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Provider Picker */}
             <div>

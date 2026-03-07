@@ -5,7 +5,28 @@ import type {
   SceneTimeline,
   SceneRenderJob,
   DirectorOutput,
+  VirtueCharacter,
+  VirtueEnvironment,
+  VirtueProp,
+  SceneContext,
 } from "@virtue/types";
+
+interface EnrichmentResult {
+  enrichedPrompt: string;
+  originalPrompt: string;
+  continuityFragment: string;
+}
+
+interface ResolvedContext {
+  context: SceneContext | undefined;
+  resolved: {
+    environment: VirtueEnvironment | undefined;
+    characters: VirtueCharacter[];
+    props: VirtueProp[];
+    lightingIntent: string;
+    moodIntent: string;
+  };
+}
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -165,5 +186,76 @@ export const api = {
         method: "POST",
         body: JSON.stringify({ text, mode, projectName }),
       },
+    ),
+
+  // ─── Continuity ─────────────────────────────────────────
+
+  // Characters
+  listCharacters: (projectId: string) =>
+    request<VirtueCharacter[]>(`/api/continuity/${projectId}/characters`),
+  createCharacter: (projectId: string, data: Omit<VirtueCharacter, "id" | "projectId">) =>
+    request<VirtueCharacter>(`/api/continuity/${projectId}/characters`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateCharacter: (projectId: string, charId: string, data: Partial<VirtueCharacter>) =>
+    request<VirtueCharacter>(`/api/continuity/${projectId}/characters/${charId}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  deleteCharacter: (projectId: string, charId: string) =>
+    request<{ ok: boolean }>(`/api/continuity/${projectId}/characters/${charId}`, {
+      method: "DELETE",
+    }),
+
+  // Environments
+  listEnvironments: (projectId: string) =>
+    request<VirtueEnvironment[]>(`/api/continuity/${projectId}/environments`),
+  createEnvironment: (projectId: string, data: Omit<VirtueEnvironment, "id" | "projectId">) =>
+    request<VirtueEnvironment>(`/api/continuity/${projectId}/environments`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateEnvironment: (projectId: string, envId: string, data: Partial<VirtueEnvironment>) =>
+    request<VirtueEnvironment>(`/api/continuity/${projectId}/environments/${envId}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  deleteEnvironment: (projectId: string, envId: string) =>
+    request<{ ok: boolean }>(`/api/continuity/${projectId}/environments/${envId}`, {
+      method: "DELETE",
+    }),
+
+  // Props
+  listProps: (projectId: string) =>
+    request<VirtueProp[]>(`/api/continuity/${projectId}/props`),
+  createProp: (projectId: string, data: Omit<VirtueProp, "id" | "projectId">) =>
+    request<VirtueProp>(`/api/continuity/${projectId}/props`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateProp: (projectId: string, propId: string, data: Partial<VirtueProp>) =>
+    request<VirtueProp>(`/api/continuity/${projectId}/props/${propId}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  deleteProp: (projectId: string, propId: string) =>
+    request<{ ok: boolean }>(`/api/continuity/${projectId}/props/${propId}`, {
+      method: "DELETE",
+    }),
+
+  // Scene Context
+  getSceneContext: (projectId: string, sceneId: string) =>
+    request<ResolvedContext>(`/api/continuity/${projectId}/scenes/${sceneId}/context`),
+  updateSceneContext: (projectId: string, sceneId: string, context: SceneContext) =>
+    request<ResolvedContext>(`/api/continuity/${projectId}/scenes/${sceneId}/context`, {
+      method: "PUT",
+      body: JSON.stringify(context),
+    }),
+
+  // Prompt enrichment preview
+  getEnrichedPrompt: (projectId: string, sceneId: string, shotId: string) =>
+    request<EnrichmentResult>(
+      `/api/continuity/${projectId}/scenes/${sceneId}/shots/${shotId}/enriched-prompt`,
     ),
 };

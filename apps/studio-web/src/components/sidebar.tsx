@@ -51,6 +51,36 @@ const nav = [
   },
 ];
 
+const continuityNav = [
+  {
+    label: "Characters",
+    href: "/studio/characters",
+    icon: (
+      <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+        <path d="M8 8a3 3 0 100-6 3 3 0 000 6zm-5 6a5 5 0 0110 0H3z" />
+      </svg>
+    ),
+  },
+  {
+    label: "Environments",
+    href: "/studio/environments",
+    icon: (
+      <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+        <path d="M0 13l5-7 3.5 4 2.5-3 5 6H0zm14-9a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+    ),
+  },
+  {
+    label: "Props",
+    href: "/studio/props",
+    icon: (
+      <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+        <path d="M2.5 1A1.5 1.5 0 001 2.5v11A1.5 1.5 0 002.5 15h11a1.5 1.5 0 001.5-1.5v-11A1.5 1.5 0 0013.5 1h-11zM4 4h8v2H4V4zm0 4h5v2H4V8z" />
+      </svg>
+    ),
+  },
+];
+
 export function Sidebar() {
   const pathname = usePathname();
 
@@ -91,6 +121,30 @@ export function Sidebar() {
             </Link>
           );
         })}
+
+        {/* Continuity Section */}
+        <div className="mt-4 pt-3 border-t border-zinc-800/40">
+          <p className="px-3 mb-2 text-[9px] text-zinc-600 uppercase tracking-widest font-semibold">
+            Continuity
+          </p>
+          {continuityNav.map((item) => {
+            const active = pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 rounded-md px-3 py-2 text-[13px] transition-colors ${
+                  active
+                    ? "bg-zinc-800/60 text-zinc-100 font-medium"
+                    : "text-zinc-500 hover:bg-zinc-800/30 hover:text-zinc-300"
+                }`}
+              >
+                <span className="w-4 h-4 shrink-0 opacity-70">{item.icon}</span>
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
       </nav>
 
       {/* Provider Status */}

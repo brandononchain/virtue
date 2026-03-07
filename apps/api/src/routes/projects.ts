@@ -77,6 +77,7 @@ projectRoutes.post("/:id/scenes/:sceneId/shots", async (c) => {
     lighting: body.lighting || "natural",
     skills: [],
     characterIds: [],
+    propIds: [],
   });
 
   store.saveProject(updated);

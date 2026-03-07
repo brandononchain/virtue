@@ -84,6 +84,7 @@ directorRoutes.post("/plans/:id/create-project", (c) => {
         lighting: shotPlan.lightingIntent,
         skills: shotPlan.attachedSkills,
         characterIds: [],
+    propIds: [],
       });
     }
   }
@@ -142,6 +143,7 @@ directorRoutes.post("/create-project", async (c) => {
           lighting: shotPlan.lightingIntent,
           skills: shotPlan.attachedSkills,
           characterIds: [],
+    propIds: [],
         });
       }
     }

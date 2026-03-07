@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { store } from "../services/store.js";
 import { orchestrator, registry } from "../services/orchestrator.js";
 import type { ProviderName } from "@virtue/types";
+import { resolveContinuityContext, applyContinuityToPrompt } from "@virtue/continuity-engine";
 
 export const renderRoutes = new Hono();
 
@@ -55,7 +56,12 @@ renderRoutes.post("/", async (c) => {
   }
 
   try {
-    const job = await orchestrator.submitJob(projectId, shot, provider, prompt);
+    // Enrich prompt with continuity context
+    const continuityCtx = resolveContinuityContext(scene, project);
+    const { enrichedPrompt } = applyContinuityToPrompt(shot, continuityCtx);
+    const finalPrompt = prompt || enrichedPrompt;
+
+    const job = await orchestrator.submitJob(projectId, shot, provider, finalPrompt);
     store.saveRenderJob(job);
     return c.json(job, 201);
   } catch (err: unknown) {

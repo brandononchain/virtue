@@ -5,6 +5,7 @@ import { skillRoutes } from "./routes/skills";
 import { renderRoutes } from "./routes/renders";
 import { sceneRoutes } from "./routes/scenes";
 import { directorRoutes } from "./routes/director";
+import { continuityRoutes } from "./routes/continuity";
 import { store } from "./services/store";
 
 export const app = new Hono();
@@ -46,3 +47,4 @@ app.route("/api/skills", skillRoutes);
 app.route("/api/renders", renderRoutes);
 app.route("/api/scenes", sceneRoutes);
 app.route("/api/director", directorRoutes);
+app.route("/api/continuity", continuityRoutes);
