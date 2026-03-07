@@ -21,6 +21,8 @@
     "@virtue/asset-storage": "workspace:*",
     "@virtue/validation": "workspace:*",
     "@virtue/config": "workspace:*",
+    "@virtue/timeline-engine": "workspace:*",
+    "@virtue/media-utils": "workspace:*",
     "@hono/node-server": "^1.12.0",
     "hono": "^4.4.0"
   },

@@ -94,7 +94,7 @@ export const VirtueRenderJobSchema = z.object({
 });
 export type VirtueRenderJob = z.infer<typeof VirtueRenderJobSchema>;
 
-// ─── Timeline ────────────────────────────────────────────
+// ─── Timeline (legacy multi-track) ──────────────────────
 export const VirtueTimelineSchema = z.object({
   id: z.string(),
   projectId: z.string(),
@@ -110,6 +110,44 @@ export const VirtueTimelineSchema = z.object({
   })).default([]),
 });
 export type VirtueTimeline = z.infer<typeof VirtueTimelineSchema>;
+
+// ─── Scene Timeline ─────────────────────────────────────
+export const TimelineShotSchema = z.object({
+  shotId: z.string(),
+  renderAssetId: z.string().optional(),
+  startTime: z.number().min(0),
+  duration: z.number().positive(),
+  transitionType: z.enum(["cut", "dissolve", "fade-black", "fade-white"]).default("cut"),
+  transitionDuration: z.number().min(0).default(0),
+});
+export type TimelineShot = z.infer<typeof TimelineShotSchema>;
+
+export const SceneTimelineSchema = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  sceneId: z.string(),
+  shots: z.array(TimelineShotSchema).default([]),
+  totalDuration: z.number().min(0).default(0),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+export type SceneTimeline = z.infer<typeof SceneTimelineSchema>;
+
+// ─── Scene Render Job ───────────────────────────────────
+export const SceneRenderJobSchema = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  sceneId: z.string(),
+  timelineId: z.string(),
+  status: z.enum(["queued", "planning", "composing", "encoding", "completed", "failed"]),
+  progress: z.number().min(0).max(100).default(0),
+  shotCount: z.number().int().min(0).default(0),
+  output: VirtueAssetSchema.optional(),
+  error: z.string().optional(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+export type SceneRenderJob = z.infer<typeof SceneRenderJobSchema>;
 
 // ─── Project ─────────────────────────────────────────────
 export const VirtueProjectSchema = z.object({

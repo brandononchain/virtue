@@ -36,3 +36,21 @@ export const AssetType = {
   THUMBNAIL: "thumbnail",
 } as const;
 export type AssetType = (typeof AssetType)[keyof typeof AssetType];
+
+export const TransitionType = {
+  CUT: "cut",
+  DISSOLVE: "dissolve",
+  FADE_BLACK: "fade-black",
+  FADE_WHITE: "fade-white",
+} as const;
+export type TransitionType = (typeof TransitionType)[keyof typeof TransitionType];
+
+export const SceneRenderStatus = {
+  QUEUED: "queued",
+  PLANNING: "planning",
+  COMPOSING: "composing",
+  ENCODING: "encoding",
+  COMPLETED: "completed",
+  FAILED: "failed",
+} as const;
+export type SceneRenderStatus = (typeof SceneRenderStatus)[keyof typeof SceneRenderStatus];

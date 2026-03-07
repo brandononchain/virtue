@@ -23,6 +23,9 @@ importers:
       '@virtue/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@virtue/media-utils':
+        specifier: workspace:*
+        version: link:../../packages/media-utils
       '@virtue/provider-luma':
         specifier: workspace:*
         version: link:../../providers/luma
@@ -41,6 +44,9 @@ importers:
       '@virtue/storyboard-engine':
         specifier: workspace:*
         version: link:../../packages/storyboard-engine
+      '@virtue/timeline-engine':
+        specifier: workspace:*
+        version: link:../../packages/timeline-engine
       '@virtue/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -141,6 +147,22 @@ importers:
         specifier: ^5.5.0
         version: 5.9.3
 
+  packages/media-utils:
+    dependencies:
+      '@virtue/types':
+        specifier: workspace:*
+        version: link:../types
+      '@virtue/validation':
+        specifier: workspace:*
+        version: link:../validation
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.37
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
   packages/provider-sdk:
     dependencies:
       '@virtue/types':
@@ -185,6 +207,19 @@ importers:
       '@virtue/skills-engine':
         specifier: workspace:*
         version: link:../skills-engine
+      '@virtue/types':
+        specifier: workspace:*
+        version: link:../types
+      '@virtue/validation':
+        specifier: workspace:*
+        version: link:../validation
+    devDependencies:
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
+  packages/timeline-engine:
+    dependencies:
       '@virtue/types':
         specifier: workspace:*
         version: link:../types

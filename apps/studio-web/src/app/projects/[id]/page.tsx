@@ -278,6 +278,12 @@ export default function ProjectDetailPage() {
                         )}
                       </div>
                     </div>
+                    <Link
+                      href={`/projects/${project.id}/scenes/${scene.id}/timeline`}
+                      className="text-[10px] text-zinc-600 hover:text-emerald-400 transition-colors uppercase tracking-wider"
+                    >
+                      Timeline
+                    </Link>
                     <button
                       onClick={() =>
                         setAddingShotToScene(

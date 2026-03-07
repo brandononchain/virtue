@@ -2,6 +2,8 @@ import type {
   VirtueProject,
   VirtueSkill,
   VirtueRenderJob,
+  SceneTimeline,
+  SceneRenderJob,
 } from "@virtue/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -114,4 +116,32 @@ export const api = {
     request<{ name: string; displayName: string; available: boolean }[]>(
       "/api/renders/providers"
     ),
+
+  // Scene Timeline & Composition
+  getSceneTimeline: (projectId: string, sceneId: string) =>
+    request<SceneTimeline>(`/api/scenes/${projectId}/${sceneId}/timeline`),
+  createSceneTimeline: (projectId: string, sceneId: string) =>
+    request<SceneTimeline>(`/api/scenes/${projectId}/${sceneId}/timeline`, {
+      method: "POST",
+    }),
+  reorderTimeline: (projectId: string, sceneId: string, order: string[]) =>
+    request<SceneTimeline>(
+      `/api/scenes/${projectId}/${sceneId}/timeline/reorder`,
+      {
+        method: "POST",
+        body: JSON.stringify({ order }),
+      },
+    ),
+  composeScene: (projectId: string, sceneId: string) =>
+    request<SceneRenderJob>(`/api/scenes/${projectId}/${sceneId}/compose`, {
+      method: "POST",
+    }),
+  pollSceneComposition: (jobId: string) =>
+    request<SceneRenderJob>(`/api/scenes/compose/${jobId}/poll`, {
+      method: "POST",
+    }),
+  getSceneRenderJob: (jobId: string) =>
+    request<SceneRenderJob>(`/api/scenes/compose/${jobId}`),
+  listSceneRenderJobs: (projectId: string) =>
+    request<SceneRenderJob[]>(`/api/scenes/${projectId}/jobs`),
 };
