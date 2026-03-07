@@ -1,2 +1,2 @@
-export type { VideoProvider, GenerationRequest, GenerationResult } from "./provider";
-export { ProviderRegistry } from "./registry";
+export type { VideoProvider, GenerationRequest, GenerationResult } from "./provider.js";
+export { ProviderRegistry } from "./registry.js";

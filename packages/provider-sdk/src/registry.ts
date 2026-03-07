@@ -1,5 +1,5 @@
 import type { ProviderName } from "@virtue/types";
-import type { VideoProvider } from "./provider";
+import type { VideoProvider } from "./provider.js";
 
 export class ProviderRegistry {
   private providers = new Map<string, VideoProvider>();
