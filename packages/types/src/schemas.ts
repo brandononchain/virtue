@@ -265,6 +265,100 @@ export const DirectorOutputSchema = z.object({
 });
 export type DirectorOutput = z.infer<typeof DirectorOutputSchema>;
 
+// ─── Editor Transition ──────────────────────────────────
+export const VirtueTransitionSchema = z.object({
+  type: z.enum(["cut", "fade", "cross-dissolve"]).default("cut"),
+  durationSec: z.number().min(0).default(0),
+  easing: z.string().optional(),
+});
+export type VirtueTransition = z.infer<typeof VirtueTransitionSchema>;
+
+// ─── Audio Track ────────────────────────────────────────
+export const VirtueAudioTrackSchema = z.object({
+  id: z.string(),
+  type: z.enum(["music", "voiceover", "sfx"]),
+  assetId: z.string(),
+  label: z.string().default(""),
+  startTime: z.number().min(0).default(0),
+  endTime: z.number().min(0).optional(),
+  volume: z.number().min(0).max(1).default(1),
+  fadeInSec: z.number().min(0).default(0),
+  fadeOutSec: z.number().min(0).default(0),
+});
+export type VirtueAudioTrack = z.infer<typeof VirtueAudioTrackSchema>;
+
+// ─── Editor Timeline Shot ───────────────────────────────
+export const EditorTimelineShotSchema = z.object({
+  shotId: z.string(),
+  renderAssetId: z.string().optional(),
+  startTime: z.number().min(0),
+  duration: z.number().positive(),
+  trimStart: z.number().min(0).default(0),
+  trimEnd: z.number().min(0).default(0),
+  transition: VirtueTransitionSchema.default({ type: "cut", durationSec: 0 }),
+});
+export type EditorTimelineShot = z.infer<typeof EditorTimelineShotSchema>;
+
+// ─── Editor Timeline ────────────────────────────────────
+export const VirtueEditorTimelineSchema = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  sceneId: z.string(),
+  shots: z.array(EditorTimelineShotSchema).default([]),
+  musicTracks: z.array(VirtueAudioTrackSchema).default([]),
+  voiceoverTracks: z.array(VirtueAudioTrackSchema).default([]),
+  sfxTracks: z.array(VirtueAudioTrackSchema).default([]),
+  pacingPreset: z.enum(["cinematic", "slow-burn", "fast-cut", "trailer"]).optional(),
+  totalDuration: z.number().min(0).default(0),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+export type VirtueEditorTimeline = z.infer<typeof VirtueEditorTimelineSchema>;
+
+// ─── Export Plan ────────────────────────────────────────
+export const VirtueExportPlanSchema = z.object({
+  timelineId: z.string(),
+  sceneId: z.string(),
+  videoSegments: z.array(z.object({
+    shotId: z.string(),
+    assetPath: z.string(),
+    startTime: z.number(),
+    duration: z.number(),
+    transition: VirtueTransitionSchema,
+  })),
+  audioMix: z.array(z.object({
+    trackId: z.string(),
+    type: z.enum(["music", "voiceover", "sfx"]),
+    assetPath: z.string(),
+    startTime: z.number(),
+    endTime: z.number().optional(),
+    volume: z.number(),
+    fadeInSec: z.number(),
+    fadeOutSec: z.number(),
+  })),
+  totalDuration: z.number(),
+  outputFormat: z.string().default("mp4"),
+});
+export type VirtueExportPlan = z.infer<typeof VirtueExportPlanSchema>;
+
+// ─── Export Job ─────────────────────────────────────────
+export const VirtueExportJobSchema = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  sceneId: z.string(),
+  timelineId: z.string(),
+  status: z.enum([
+    "queued", "planning", "composing_video",
+    "mixing_audio", "encoding", "completed", "failed",
+  ]),
+  progress: z.number().min(0).max(100).default(0),
+  output: VirtueAssetSchema.optional(),
+  error: z.string().optional(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+export type VirtueExportJob = z.infer<typeof VirtueExportJobSchema>;
+
 // ─── Provider ────────────────────────────────────────────
 export const VirtueProviderSchema = z.object({
   name: z.enum(["mock", "luma", "openai", "google"]),

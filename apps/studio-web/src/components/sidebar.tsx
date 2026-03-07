@@ -122,6 +122,28 @@ export function Sidebar() {
           );
         })}
 
+        {/* Editor Section */}
+        <div className="mt-4 pt-3 border-t border-zinc-800/40">
+          <p className="px-3 mb-2 text-[9px] text-zinc-600 uppercase tracking-widest font-semibold">
+            Post-Production
+          </p>
+          <Link
+            href="/studio/exports"
+            className={`flex items-center gap-3 rounded-md px-3 py-2 text-[13px] transition-colors ${
+              pathname.startsWith("/studio/exports")
+                ? "bg-zinc-800/60 text-zinc-100 font-medium"
+                : "text-zinc-500 hover:bg-zinc-800/30 hover:text-zinc-300"
+            }`}
+          >
+            <span className="w-4 h-4 shrink-0 opacity-70">
+              <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+                <path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3zm2 1v2h8V4H4zm0 4v1.5h3V8H4zm0 3v1h8v-1H4zm5-3v1.5h3V8H9z" />
+              </svg>
+            </span>
+            Exports
+          </Link>
+        </div>
+
         {/* Continuity Section */}
         <div className="mt-4 pt-3 border-t border-zinc-800/40">
           <p className="px-3 mb-2 text-[9px] text-zinc-600 uppercase tracking-widest font-semibold">

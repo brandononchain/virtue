@@ -29,6 +29,9 @@ importers:
       '@virtue/director-engine':
         specifier: workspace:*
         version: link:../../packages/director-engine
+      '@virtue/editor-engine':
+        specifier: workspace:*
+        version: link:../../packages/editor-engine
       '@virtue/media-utils':
         specifier: workspace:*
         version: link:../../packages/media-utils
@@ -167,6 +170,19 @@ importers:
         version: 5.9.3
 
   packages/director-engine:
+    dependencies:
+      '@virtue/types':
+        specifier: workspace:*
+        version: link:../types
+      '@virtue/validation':
+        specifier: workspace:*
+        version: link:../validation
+    devDependencies:
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
+  packages/editor-engine:
     dependencies:
       '@virtue/types':
         specifier: workspace:*

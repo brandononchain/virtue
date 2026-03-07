@@ -4,6 +4,8 @@ import type {
   VirtueSkill,
   SceneTimeline,
   SceneRenderJob,
+  VirtueEditorTimeline,
+  VirtueExportJob,
 } from "@virtue/types";
 
 /**
@@ -16,6 +18,8 @@ class Store {
   skills: VirtueSkill[] = [];
   sceneTimelines = new Map<string, SceneTimeline>();
   sceneRenderJobs = new Map<string, SceneRenderJob>();
+  editorTimelines = new Map<string, VirtueEditorTimeline>();
+  exportJobs = new Map<string, VirtueExportJob>();
 
   getProject(id: string) {
     return this.projects.get(id);
@@ -80,6 +84,37 @@ class Store {
 
   listSceneRenderJobs(projectId?: string) {
     const jobs = Array.from(this.sceneRenderJobs.values());
+    if (projectId) return jobs.filter((j) => j.projectId === projectId);
+    return jobs;
+  }
+
+  // Editor timelines
+  saveEditorTimeline(timeline: VirtueEditorTimeline) {
+    this.editorTimelines.set(timeline.id, timeline);
+  }
+
+  getEditorTimeline(id: string) {
+    return this.editorTimelines.get(id);
+  }
+
+  getEditorTimelineBySceneId(sceneId: string) {
+    const matches = Array.from(this.editorTimelines.values())
+      .filter((t) => t.sceneId === sceneId)
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    return matches[0];
+  }
+
+  // Export jobs
+  saveExportJob(job: VirtueExportJob) {
+    this.exportJobs.set(job.id, job);
+  }
+
+  getExportJob(id: string) {
+    return this.exportJobs.get(id);
+  }
+
+  listExportJobs(projectId?: string) {
+    const jobs = Array.from(this.exportJobs.values());
     if (projectId) return jobs.filter((j) => j.projectId === projectId);
     return jobs;
   }

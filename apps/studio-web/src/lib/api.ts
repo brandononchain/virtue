@@ -9,6 +9,9 @@ import type {
   VirtueEnvironment,
   VirtueProp,
   SceneContext,
+  VirtueEditorTimeline,
+  VirtueExportJob,
+  VirtueTransition,
 } from "@virtue/types";
 
 interface EnrichmentResult {
@@ -258,4 +261,79 @@ export const api = {
     request<EnrichmentResult>(
       `/api/continuity/${projectId}/scenes/${sceneId}/shots/${shotId}/enriched-prompt`,
     ),
+
+  // ─── Editor ──────────────────────────────────────────────
+
+  getEditorTimeline: (projectId: string, sceneId: string) =>
+    request<VirtueEditorTimeline>(`/api/editor/scenes/${projectId}/${sceneId}`),
+  createEditorTimeline: (projectId: string, sceneId: string) =>
+    request<VirtueEditorTimeline>(`/api/editor/scenes/${projectId}/${sceneId}`, {
+      method: "POST",
+    }),
+  saveEditorTimeline: (projectId: string, sceneId: string, timeline: Partial<VirtueEditorTimeline>) =>
+    request<VirtueEditorTimeline>(`/api/editor/scenes/${projectId}/${sceneId}`, {
+      method: "PUT",
+      body: JSON.stringify(timeline),
+    }),
+  addEditorTransition: (projectId: string, sceneId: string, shotId: string, transition: VirtueTransition) =>
+    request<VirtueEditorTimeline>(`/api/editor/scenes/${projectId}/${sceneId}/transition`, {
+      method: "POST",
+      body: JSON.stringify({ shotId, transition }),
+    }),
+  removeEditorTransition: (projectId: string, sceneId: string, shotId: string) =>
+    request<VirtueEditorTimeline>(`/api/editor/scenes/${projectId}/${sceneId}/transition/${shotId}`, {
+      method: "DELETE",
+    }),
+  addAudioTrack: (
+    projectId: string,
+    sceneId: string,
+    data: {
+      type: "music" | "voiceover" | "sfx";
+      assetId: string;
+      startTime: number;
+      endTime?: number;
+      label?: string;
+      volume?: number;
+    },
+  ) =>
+    request<VirtueEditorTimeline>(`/api/editor/scenes/${projectId}/${sceneId}/audio`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  removeAudioTrack: (projectId: string, sceneId: string, trackId: string) =>
+    request<VirtueEditorTimeline>(`/api/editor/scenes/${projectId}/${sceneId}/audio/${trackId}`, {
+      method: "DELETE",
+    }),
+  updateAudioTrack: (projectId: string, sceneId: string, trackId: string, updates: Record<string, unknown>) =>
+    request<VirtueEditorTimeline>(`/api/editor/scenes/${projectId}/${sceneId}/audio/${trackId}`, {
+      method: "PUT",
+      body: JSON.stringify(updates),
+    }),
+  applyPacingPreset: (projectId: string, sceneId: string, preset: string) =>
+    request<VirtueEditorTimeline>(`/api/editor/scenes/${projectId}/${sceneId}/pacing`, {
+      method: "POST",
+      body: JSON.stringify({ preset }),
+    }),
+  reorderEditorShots: (projectId: string, sceneId: string, order: string[]) =>
+    request<VirtueEditorTimeline>(`/api/editor/scenes/${projectId}/${sceneId}/reorder`, {
+      method: "POST",
+      body: JSON.stringify({ order }),
+    }),
+  trimEditorShot: (projectId: string, sceneId: string, shotId: string, trimStart: number, trimEnd: number) =>
+    request<VirtueEditorTimeline>(`/api/editor/scenes/${projectId}/${sceneId}/trim`, {
+      method: "POST",
+      body: JSON.stringify({ shotId, trimStart, trimEnd }),
+    }),
+
+  // Export
+  exportScene: (projectId: string, sceneId: string) =>
+    request<VirtueExportJob>(`/api/editor/scenes/${projectId}/${sceneId}/export`, {
+      method: "POST",
+    }),
+  listExports: (projectId?: string) =>
+    request<VirtueExportJob[]>(`/api/editor/exports${projectId ? `?projectId=${projectId}` : ""}`),
+  getExport: (id: string) =>
+    request<VirtueExportJob>(`/api/editor/exports/${id}`),
+  pollExport: (id: string) =>
+    request<VirtueExportJob>(`/api/editor/exports/${id}/poll`, { method: "POST" }),
 };

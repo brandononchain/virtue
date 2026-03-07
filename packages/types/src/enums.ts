@@ -60,3 +60,36 @@ export const DirectorInputMode = {
   CONCEPT: "concept",
 } as const;
 export type DirectorInputMode = (typeof DirectorInputMode)[keyof typeof DirectorInputMode];
+
+export const EditorTransitionType = {
+  CUT: "cut",
+  FADE: "fade",
+  CROSS_DISSOLVE: "cross-dissolve",
+} as const;
+export type EditorTransitionType = (typeof EditorTransitionType)[keyof typeof EditorTransitionType];
+
+export const AudioTrackType = {
+  MUSIC: "music",
+  VOICEOVER: "voiceover",
+  SFX: "sfx",
+} as const;
+export type AudioTrackType = (typeof AudioTrackType)[keyof typeof AudioTrackType];
+
+export const ExportJobStatus = {
+  QUEUED: "queued",
+  PLANNING: "planning",
+  COMPOSING_VIDEO: "composing_video",
+  MIXING_AUDIO: "mixing_audio",
+  ENCODING: "encoding",
+  COMPLETED: "completed",
+  FAILED: "failed",
+} as const;
+export type ExportJobStatus = (typeof ExportJobStatus)[keyof typeof ExportJobStatus];
+
+export const PacingPreset = {
+  CINEMATIC: "cinematic",
+  SLOW_BURN: "slow-burn",
+  FAST_CUT: "fast-cut",
+  TRAILER: "trailer",
+} as const;
+export type PacingPreset = (typeof PacingPreset)[keyof typeof PacingPreset];

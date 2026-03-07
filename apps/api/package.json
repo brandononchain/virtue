@@ -25,6 +25,7 @@
     "@virtue/media-utils": "workspace:*",
     "@virtue/director-engine": "workspace:*",
     "@virtue/continuity-engine": "workspace:*",
+    "@virtue/editor-engine": "workspace:*",
     "@hono/node-server": "^1.12.0",
     "hono": "^4.4.0"
   },

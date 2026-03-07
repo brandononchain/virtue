@@ -167,6 +167,12 @@ export default function SceneTimelinePage() {
           </span>
         </div>
         <div className="flex items-center gap-3">
+          <Link
+            href={`/projects/${projectId}/scenes/${sceneId}/editor`}
+            className="rounded-md bg-amber-600/90 px-3 py-1 text-[10px] font-semibold text-white uppercase tracking-wider hover:bg-amber-500 transition-colors"
+          >
+            Open Editor
+          </Link>
           <button
             onClick={refreshTimeline}
             className="text-[10px] text-zinc-500 hover:text-zinc-300 uppercase tracking-wider transition-colors"
