@@ -7,8 +7,10 @@ import type { VirtueProject } from "@virtue/types";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<VirtueProject[]>([]);
+  const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [description, setDescription] = useState("");
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     api.listProjects().then(setProjects).catch(() => {});
@@ -16,67 +18,136 @@ export default function ProjectsPage() {
 
   async function handleCreate() {
     if (!name.trim()) return;
-    setLoading(true);
+    setCreating(true);
     try {
-      const project = await api.createProject(name);
+      const project = await api.createProject(name, description || undefined);
       setProjects((p) => [...p, project]);
       setName("");
+      setDescription("");
+      setShowCreate(false);
     } finally {
-      setLoading(false);
+      setCreating(false);
     }
   }
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-8 space-y-6 max-w-[1200px]">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
             Projects
           </h1>
           <p className="text-sm text-zinc-500 mt-1">
-            Manage your cinematic generation projects
+            {projects.length} project{projects.length !== 1 ? "s" : ""}
           </p>
         </div>
-      </div>
-
-      <div className="flex gap-3">
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-          placeholder="New project name..."
-          className="flex-1 rounded-md border border-zinc-800 bg-zinc-900 px-4 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:border-zinc-600 focus:outline-none"
-        />
         <button
-          onClick={handleCreate}
-          disabled={loading || !name.trim()}
-          className="rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-500 disabled:opacity-50"
+          onClick={() => setShowCreate(!showCreate)}
+          className="rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-white"
         >
-          Create
+          New Project
         </button>
       </div>
 
-      {projects.length === 0 ? (
-        <div className="studio-panel p-12 text-center">
-          <p className="text-zinc-500">No projects yet. Create one above.</p>
+      {/* Create form */}
+      {showCreate && (
+        <div className="studio-panel p-5 space-y-4">
+          <h2 className="text-sm font-semibold text-zinc-300">
+            Create Project
+          </h2>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs text-zinc-500 mb-1.5">
+                Project Name
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+                placeholder="e.g. Neon City"
+                className="w-full rounded-md border border-zinc-800 bg-zinc-900/80 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:border-zinc-600 focus:outline-none"
+                autoFocus
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-zinc-500 mb-1.5">
+                Description
+              </label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Brief synopsis or concept..."
+                rows={2}
+                className="w-full rounded-md border border-zinc-800 bg-zinc-900/80 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:border-zinc-600 focus:outline-none resize-none"
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setShowCreate(false)}
+                className="rounded-md px-4 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreate}
+                disabled={creating || !name.trim()}
+                className="rounded-md bg-zinc-100 px-4 py-1.5 text-sm font-medium text-zinc-900 transition-colors hover:bg-white disabled:opacity-40"
+              >
+                {creating ? "Creating..." : "Create"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Project grid */}
+      {projects.length === 0 && !showCreate ? (
+        <div className="studio-panel p-16 text-center">
+          <p className="text-zinc-600 text-sm">No projects yet.</p>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="mt-3 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+          >
+            Create your first project
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-4">
-          {projects.map((project) => (
-            <Link key={project.id} href={`/projects/${project.id}`}>
-              <div className="studio-panel p-5 transition-colors hover:border-zinc-600 cursor-pointer">
-                <h3 className="font-semibold text-zinc-200">{project.name}</h3>
-                <p className="text-xs text-zinc-500 mt-1">
-                  {project.scenes.length} scene
-                  {project.scenes.length !== 1 ? "s" : ""}
-                </p>
-                <p className="text-[10px] text-zinc-600 mt-2 uppercase">
-                  {project.provider} provider
-                </p>
-              </div>
-            </Link>
-          ))}
+          {projects.map((project) => {
+            const shotCount = project.scenes.reduce(
+              (n, s) => n + s.shots.length,
+              0
+            );
+            return (
+              <Link key={project.id} href={`/projects/${project.id}`}>
+                <div className="studio-panel p-5 h-full transition-all hover:border-zinc-600 cursor-pointer group">
+                  <div className="flex items-start justify-between">
+                    <h3 className="font-semibold text-zinc-200 group-hover:text-zinc-100 transition-colors">
+                      {project.name}
+                    </h3>
+                    <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-[9px] text-zinc-500 font-mono uppercase">
+                      {project.provider}
+                    </span>
+                  </div>
+                  {project.description && (
+                    <p className="text-xs text-zinc-500 mt-2 line-clamp-2">
+                      {project.description}
+                    </p>
+                  )}
+                  <div className="flex gap-4 mt-4 pt-3 border-t border-zinc-800/50">
+                    <span className="text-xs text-zinc-600">
+                      {project.scenes.length} scene
+                      {project.scenes.length !== 1 ? "s" : ""}
+                    </span>
+                    <span className="text-xs text-zinc-600">
+                      {shotCount} shot{shotCount !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
