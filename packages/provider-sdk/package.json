@@ -1,0 +1,11 @@
+{
+  "name": "@virtue/provider-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "scripts": { "build": "tsc", "type-check": "tsc --noEmit", "clean": "rm -rf dist" },
+  "dependencies": { "@virtue/types": "workspace:*" },
+  "devDependencies": { "typescript": "^5.5.0" }
+}

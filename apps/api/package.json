@@ -1,0 +1,30 @@
+{
+  "name": "@virtue/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@virtue/types": "workspace:*",
+    "@virtue/skills-engine": "workspace:*",
+    "@virtue/storyboard-engine": "workspace:*",
+    "@virtue/render-orchestrator": "workspace:*",
+    "@virtue/provider-sdk": "workspace:*",
+    "@virtue/provider-mock": "workspace:*",
+    "@virtue/validation": "workspace:*",
+    "@virtue/config": "workspace:*",
+    "@hono/node-server": "^1.12.0",
+    "hono": "^4.4.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "tsx": "^4.15.0",
+    "@types/node": "^20.0.0"
+  }
+}
