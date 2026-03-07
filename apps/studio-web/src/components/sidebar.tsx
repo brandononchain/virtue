@@ -32,6 +32,15 @@ const nav = [
     ),
   },
   {
+    label: "Director",
+    href: "/director",
+    icon: (
+      <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+        <path d="M2 2h3l2 3h7v9H2V2zm0 1v11h10V6H6.5L4.5 3H3v0z" />
+      </svg>
+    ),
+  },
+  {
     label: "Skills",
     href: "/skills",
     icon: (

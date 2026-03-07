@@ -165,6 +165,57 @@ export const VirtueProjectSchema = z.object({
 });
 export type VirtueProject = z.infer<typeof VirtueProjectSchema>;
 
+// ─── Director ───────────────────────────────────────────
+export const DirectorInputSchema = z.object({
+  text: z.string().min(1),
+  mode: z.enum(["screenplay", "concept"]).default("concept"),
+  projectName: z.string().optional(),
+});
+export type DirectorInput = z.infer<typeof DirectorInputSchema>;
+
+export const DirectorShotPlanSchema = z.object({
+  shotTitle: z.string(),
+  shotType: z.enum([
+    "wide", "medium", "close", "extreme-close",
+    "establishing", "over-shoulder", "pov", "aerial",
+  ]),
+  description: z.string(),
+  lens: z.string(),
+  cameraMove: z.string(),
+  estimatedDuration: z.number().positive(),
+  visualIntent: z.string(),
+  lightingIntent: z.string(),
+  environmentNotes: z.string().default(""),
+  characterNotes: z.string().default(""),
+  promptSeed: z.string(),
+  attachedSkills: z.array(z.string()).default([]),
+});
+export type DirectorShotPlan = z.infer<typeof DirectorShotPlanSchema>;
+
+export const DirectorScenePlanSchema = z.object({
+  sceneNumber: z.number().int().min(1),
+  title: z.string(),
+  location: z.string(),
+  timeOfDay: z.string(),
+  mood: z.string(),
+  description: z.string(),
+  characters: z.array(z.string()).default([]),
+  shots: z.array(DirectorShotPlanSchema).default([]),
+});
+export type DirectorScenePlan = z.infer<typeof DirectorScenePlanSchema>;
+
+export const DirectorOutputSchema = z.object({
+  id: z.string(),
+  input: DirectorInputSchema,
+  projectName: z.string(),
+  synopsis: z.string(),
+  scenes: z.array(DirectorScenePlanSchema),
+  totalShots: z.number().int().min(0),
+  estimatedDuration: z.number().min(0),
+  createdAt: z.string().datetime(),
+});
+export type DirectorOutput = z.infer<typeof DirectorOutputSchema>;
+
 // ─── Provider ────────────────────────────────────────────
 export const VirtueProviderSchema = z.object({
   name: z.enum(["mock", "luma", "openai", "google"]),

@@ -54,3 +54,9 @@ export const SceneRenderStatus = {
   FAILED: "failed",
 } as const;
 export type SceneRenderStatus = (typeof SceneRenderStatus)[keyof typeof SceneRenderStatus];
+
+export const DirectorInputMode = {
+  SCREENPLAY: "screenplay",
+  CONCEPT: "concept",
+} as const;
+export type DirectorInputMode = (typeof DirectorInputMode)[keyof typeof DirectorInputMode];

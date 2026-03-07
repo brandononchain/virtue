@@ -4,6 +4,7 @@ import { projectRoutes } from "./routes/projects";
 import { skillRoutes } from "./routes/skills";
 import { renderRoutes } from "./routes/renders";
 import { sceneRoutes } from "./routes/scenes";
+import { directorRoutes } from "./routes/director";
 import { store } from "./services/store";
 
 export const app = new Hono();
@@ -44,3 +45,4 @@ app.route("/api/projects", projectRoutes);
 app.route("/api/skills", skillRoutes);
 app.route("/api/renders", renderRoutes);
 app.route("/api/scenes", sceneRoutes);
+app.route("/api/director", directorRoutes);

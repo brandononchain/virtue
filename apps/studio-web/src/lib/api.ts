@@ -4,6 +4,7 @@ import type {
   VirtueRenderJob,
   SceneTimeline,
   SceneRenderJob,
+  DirectorOutput,
 } from "@virtue/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -144,4 +145,25 @@ export const api = {
     request<SceneRenderJob>(`/api/scenes/compose/${jobId}`),
   listSceneRenderJobs: (projectId: string) =>
     request<SceneRenderJob[]>(`/api/scenes/${projectId}/jobs`),
+
+  // Director
+  generatePlan: (text: string, mode: "screenplay" | "concept", projectName?: string) =>
+    request<DirectorOutput>("/api/director/plan", {
+      method: "POST",
+      body: JSON.stringify({ text, mode, projectName }),
+    }),
+  getPlan: (id: string) =>
+    request<DirectorOutput>(`/api/director/plans/${id}`),
+  createProjectFromPlan: (planId: string) =>
+    request<VirtueProject>(`/api/director/plans/${planId}/create-project`, {
+      method: "POST",
+    }),
+  directorCreateProject: (text: string, mode: "screenplay" | "concept", projectName?: string) =>
+    request<{ plan: DirectorOutput; project: VirtueProject }>(
+      "/api/director/create-project",
+      {
+        method: "POST",
+        body: JSON.stringify({ text, mode, projectName }),
+      },
+    ),
 };
