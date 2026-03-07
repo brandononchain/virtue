@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { api } from "@/lib/api";
 import type { VirtueRenderJob } from "@virtue/types";
 
@@ -58,14 +58,40 @@ const FILTER_OPTIONS: { value: FilterStatus; label: string }[] = [
   { value: "failed", label: "Failed" },
 ];
 
+function isTerminal(status: string) {
+  return status === "completed" || status === "failed";
+}
+
 export default function RendersPage() {
   const [jobs, setJobs] = useState<VirtueRenderJob[]>([]);
   const [filter, setFilter] = useState<FilterStatus>("all");
   const [selectedJob, setSelectedJob] = useState<VirtueRenderJob | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Load jobs
   useEffect(() => {
     api.listRenders().then(setJobs).catch(() => {});
   }, []);
+
+  // Auto-poll: refresh the job list every 5s if any jobs are active
+  useEffect(() => {
+    const hasActive = jobs.some((j) => !isTerminal(j.status));
+    if (hasActive) {
+      pollRef.current = setInterval(() => {
+        api.listRenders().then((fresh) => {
+          setJobs(fresh);
+          // Update selected job if it's still selected
+          setSelectedJob((prev) => {
+            if (!prev) return null;
+            return fresh.find((j) => j.id === prev.id) || prev;
+          });
+        }).catch(() => {});
+      }, 5000);
+    }
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [jobs.some((j) => !isTerminal(j.status))]);
 
   async function handlePoll(jobId: string) {
     const updated = await api.pollRender(jobId);
@@ -153,9 +179,14 @@ export default function RendersPage() {
                     <p className="text-sm text-zinc-300 truncate">
                       {job.prompt}
                     </p>
-                    <p className="text-[10px] text-zinc-700 font-mono mt-0.5">
-                      {job.id.slice(0, 12)}
-                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <p className="text-[10px] text-zinc-700 font-mono">
+                        {job.id.slice(0, 12)}
+                      </p>
+                      <span className="text-[9px] text-zinc-600 font-mono uppercase">
+                        {job.provider}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Progress bar */}
@@ -184,8 +215,8 @@ export default function RendersPage() {
                     {cfg.label}
                   </span>
 
-                  {/* Poll button */}
-                  {job.status !== "completed" && job.status !== "failed" && (
+                  {/* Poll button (manual, for mock) */}
+                  {!isTerminal(job.status) && job.provider === "mock" && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -219,6 +250,26 @@ export default function RendersPage() {
           </div>
 
           <div className="p-5 space-y-5">
+            {/* Video Player */}
+            {selectedJob.output?.url && selectedJob.status === "completed" && (
+              <div>
+                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                  Result
+                </label>
+                <div className="rounded-lg overflow-hidden border border-zinc-800/60 bg-black">
+                  <video
+                    src={selectedJob.output.url}
+                    controls
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full aspect-video"
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Status */}
             <div>
               <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
@@ -313,7 +364,7 @@ export default function RendersPage() {
               </div>
             )}
 
-            {/* Output */}
+            {/* Output metadata */}
             {selectedJob.output && (
               <div>
                 <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
@@ -330,16 +381,23 @@ export default function RendersPage() {
               </div>
             )}
 
-            {/* Poll */}
-            {selectedJob.status !== "completed" &&
-              selectedJob.status !== "failed" && (
-                <button
-                  onClick={() => handlePoll(selectedJob.id)}
-                  className="w-full rounded-md bg-zinc-100 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-white"
-                >
-                  Advance Pipeline
-                </button>
-              )}
+            {/* Poll (for mock provider) */}
+            {!isTerminal(selectedJob.status) && selectedJob.provider === "mock" && (
+              <button
+                onClick={() => handlePoll(selectedJob.id)}
+                className="w-full rounded-md bg-zinc-100 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-white"
+              >
+                Advance Pipeline
+              </button>
+            )}
+
+            {/* Active polling indicator for real providers */}
+            {!isTerminal(selectedJob.status) && selectedJob.provider !== "mock" && (
+              <div className="flex items-center gap-2 text-xs text-zinc-500">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
+                Auto-polling... checking every 5s
+              </div>
+            )}
           </div>
         </div>
       )}

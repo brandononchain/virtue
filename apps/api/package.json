@@ -17,6 +17,8 @@
     "@virtue/render-orchestrator": "workspace:*",
     "@virtue/provider-sdk": "workspace:*",
     "@virtue/provider-mock": "workspace:*",
+    "@virtue/provider-luma": "workspace:*",
+    "@virtue/asset-storage": "workspace:*",
     "@virtue/validation": "workspace:*",
     "@virtue/config": "workspace:*",
     "@hono/node-server": "^1.12.0",

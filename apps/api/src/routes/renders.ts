@@ -1,8 +1,22 @@
 import { Hono } from "hono";
-import { store } from "../services/store";
-import { orchestrator } from "../services/orchestrator";
+import { store } from "../services/store.js";
+import { orchestrator, registry } from "../services/orchestrator.js";
+import type { ProviderName } from "@virtue/types";
 
 export const renderRoutes = new Hono();
+
+// List available providers — registered before parameterized routes
+renderRoutes.get("/providers", async (c) => {
+  const providers = registry.list();
+  const result = await Promise.all(
+    providers.map(async (p) => ({
+      name: p.name,
+      displayName: p.displayName,
+      available: await p.isAvailable(),
+    }))
+  );
+  return c.json(result);
+});
 
 // List render jobs
 renderRoutes.get("/", (c) => {
@@ -19,10 +33,12 @@ renderRoutes.get("/:id", (c) => {
 
 // Submit render job for a shot
 renderRoutes.post("/", async (c) => {
-  const { projectId, sceneId, shotId } = await c.req.json<{
+  const { projectId, sceneId, shotId, provider, prompt } = await c.req.json<{
     projectId: string;
     sceneId: string;
     shotId: string;
+    provider?: ProviderName;
+    prompt?: string;
   }>();
 
   const project = store.getProject(projectId);
@@ -34,12 +50,21 @@ renderRoutes.post("/", async (c) => {
   const shot = scene.shots.find((s) => s.id === shotId);
   if (!shot) return c.json({ error: "Shot not found" }, 404);
 
-  const job = await orchestrator.submitJob(projectId, shot);
-  store.saveRenderJob(job);
-  return c.json(job, 201);
+  if (provider && !registry.has(provider)) {
+    return c.json({ error: `Provider "${provider}" is not available` }, 400);
+  }
+
+  try {
+    const job = await orchestrator.submitJob(projectId, shot, provider, prompt);
+    store.saveRenderJob(job);
+    return c.json(job, 201);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Submission failed";
+    return c.json({ error: message }, 500);
+  }
 });
 
-// Poll render job (advance mock state)
+// Poll render job (advance state)
 renderRoutes.post("/:id/poll", async (c) => {
   const jobId = c.req.param("id");
   const job = await orchestrator.pollJob(jobId);

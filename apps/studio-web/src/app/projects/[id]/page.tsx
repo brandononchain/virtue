@@ -4,7 +4,13 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import type { VirtueProject, VirtueShot, VirtueScene } from "@virtue/types";
+import type { VirtueProject, VirtueShot, VirtueScene, VirtueRenderJob } from "@virtue/types";
+
+interface ProviderInfo {
+  name: string;
+  displayName: string;
+  available: boolean;
+}
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -13,6 +19,13 @@ export default function ProjectDetailPage() {
     scene: VirtueScene;
     shot: VirtueShot;
   } | null>(null);
+
+  // Provider state
+  const [providers, setProviders] = useState<ProviderInfo[]>([]);
+  const [renderProvider, setRenderProvider] = useState("mock");
+  const [renderPrompt, setRenderPrompt] = useState("");
+  const [renderStatus, setRenderStatus] = useState<VirtueRenderJob | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   // Scene creation
   const [showAddScene, setShowAddScene] = useState(false);
@@ -34,7 +47,16 @@ export default function ProjectDetailPage() {
 
   useEffect(() => {
     if (id) api.getProject(id).then(setProject).catch(() => {});
+    api.listProviders().then(setProviders).catch(() => {});
   }, [id]);
+
+  // When selecting a shot, populate the prompt field
+  useEffect(() => {
+    if (selectedShot) {
+      setRenderPrompt(selectedShot.shot.prompt || selectedShot.shot.description);
+      setRenderStatus(null);
+    }
+  }, [selectedShot?.shot.id]);
 
   async function handleAddScene() {
     if (!sceneTitle.trim() || !project) return;
@@ -74,7 +96,51 @@ export default function ProjectDetailPage() {
 
   async function handleSubmitRender(sceneId: string, shotId: string) {
     if (!project) return;
-    await api.submitRender(project.id, sceneId, shotId);
+    setSubmitting(true);
+    try {
+      const job = await api.submitRender(
+        project.id,
+        sceneId,
+        shotId,
+        renderProvider || undefined,
+        renderPrompt || undefined,
+      );
+      setRenderStatus(job);
+      // Start polling if not terminal
+      if (job.status !== "completed" && job.status !== "failed") {
+        pollRenderJob(job.id);
+      }
+    } catch (err) {
+      setRenderStatus({
+        id: "error",
+        projectId: project.id,
+        shotId,
+        provider: renderProvider as any,
+        status: "failed",
+        progress: 0,
+        prompt: renderPrompt,
+        skills: [],
+        error: err instanceof Error ? err.message : "Failed to submit",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function pollRenderJob(jobId: string) {
+    const interval = setInterval(async () => {
+      try {
+        const job = await api.getRender(jobId);
+        setRenderStatus(job);
+        if (job.status === "completed" || job.status === "failed") {
+          clearInterval(interval);
+        }
+      } catch {
+        clearInterval(interval);
+      }
+    }, 5000);
   }
 
   if (!project) {
@@ -396,6 +462,65 @@ export default function ProjectDetailPage() {
           </div>
 
           <div className="p-5 space-y-5">
+            {/* Render Result Video */}
+            {renderStatus?.output?.url && renderStatus.status === "completed" && (
+              <div>
+                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                  Render Result
+                </label>
+                <div className="rounded-lg overflow-hidden border border-zinc-800/60 bg-black">
+                  <video
+                    src={renderStatus.output.url}
+                    controls
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full aspect-video"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Render Status */}
+            {renderStatus && (
+              <div>
+                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                  Render Status
+                </label>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`h-2 w-2 rounded-full shrink-0 ${
+                    renderStatus.status === "completed" ? "bg-emerald-500"
+                    : renderStatus.status === "failed" ? "bg-red-400"
+                    : "bg-blue-400 animate-pulse"
+                  }`} />
+                  <span className={`text-xs font-medium uppercase ${
+                    renderStatus.status === "completed" ? "text-emerald-400"
+                    : renderStatus.status === "failed" ? "text-red-400"
+                    : "text-blue-400"
+                  }`}>
+                    {renderStatus.status}
+                  </span>
+                  <span className="text-xs text-zinc-600 ml-auto tabular-nums">
+                    {renderStatus.progress}%
+                  </span>
+                </div>
+                <div className="h-1.5 rounded-full bg-zinc-800">
+                  <div
+                    className={`h-1.5 rounded-full transition-all duration-500 ${
+                      renderStatus.status === "completed" ? "bg-emerald-500"
+                      : renderStatus.status === "failed" ? "bg-red-500"
+                      : "bg-blue-500"
+                    }`}
+                    style={{ width: `${renderStatus.progress}%` }}
+                  />
+                </div>
+                {renderStatus.error && (
+                  <p className="text-xs text-red-400 mt-1.5">{renderStatus.error}</p>
+                )}
+              </div>
+            )}
+
             {/* Description */}
             <div>
               <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
@@ -406,17 +531,50 @@ export default function ProjectDetailPage() {
               </p>
             </div>
 
-            {/* Prompt */}
-            {selectedShot.shot.prompt && (
-              <div>
-                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
-                  Generation Prompt
-                </label>
-                <p className="text-xs text-zinc-400 leading-relaxed bg-zinc-900/60 rounded-md p-3 border border-zinc-800/40">
-                  {selectedShot.shot.prompt}
-                </p>
+            {/* Editable Prompt */}
+            <div>
+              <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                Generation Prompt
+              </label>
+              <textarea
+                value={renderPrompt}
+                onChange={(e) => setRenderPrompt(e.target.value)}
+                rows={4}
+                className="w-full rounded-md border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-xs text-zinc-300 placeholder-zinc-600 focus:border-zinc-600 focus:outline-none resize-none leading-relaxed"
+                placeholder="Enter generation prompt..."
+              />
+            </div>
+
+            {/* Provider Picker */}
+            <div>
+              <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                Provider
+              </label>
+              <div className="flex gap-2">
+                {providers.map((p) => (
+                  <button
+                    key={p.name}
+                    onClick={() => setRenderProvider(p.name)}
+                    disabled={!p.available}
+                    className={`flex-1 rounded-md px-3 py-2 text-xs font-medium transition-colors border ${
+                      renderProvider === p.name
+                        ? "border-zinc-500 bg-zinc-800 text-zinc-200"
+                        : p.available
+                          ? "border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700"
+                          : "border-zinc-800/50 text-zinc-700 cursor-not-allowed"
+                    }`}
+                  >
+                    {p.displayName}
+                    {!p.available && (
+                      <span className="block text-[9px] text-zinc-700 mt-0.5">No API key</span>
+                    )}
+                  </button>
+                ))}
+                {providers.length === 0 && (
+                  <span className="text-xs text-zinc-600">Loading providers...</span>
+                )}
               </div>
-            )}
+            </div>
 
             {/* Parameters Grid */}
             <div className="grid grid-cols-2 gap-3">
@@ -484,9 +642,10 @@ export default function ProjectDetailPage() {
                   selectedShot.shot.id
                 )
               }
-              className="w-full rounded-md bg-zinc-100 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-white"
+              disabled={submitting || !renderPrompt.trim()}
+              className="w-full rounded-md bg-zinc-100 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-white disabled:opacity-40"
             >
-              Submit Render
+              {submitting ? "Submitting..." : `Render with ${renderProvider}`}
             </button>
           </div>
         </div>

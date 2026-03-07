@@ -17,9 +17,15 @@ importers:
       '@hono/node-server':
         specifier: ^1.12.0
         version: 1.19.11(hono@4.12.5)
+      '@virtue/asset-storage':
+        specifier: workspace:*
+        version: link:../../packages/asset-storage
       '@virtue/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@virtue/provider-luma':
+        specifier: workspace:*
+        version: link:../../providers/luma
       '@virtue/provider-mock':
         specifier: workspace:*
         version: link:../../providers/mock
@@ -106,6 +112,22 @@ importers:
       tailwindcss:
         specifier: ^3.4.0
         version: 3.4.19(tsx@4.21.0)
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
+  packages/asset-storage:
+    dependencies:
+      '@virtue/types':
+        specifier: workspace:*
+        version: link:../types
+      '@virtue/validation':
+        specifier: workspace:*
+        version: link:../validation
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.37
       typescript:
         specifier: ^5.5.0
         version: 5.9.3

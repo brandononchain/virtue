@@ -1,7 +1,8 @@
 import type { VirtueProject, VirtueRenderJob } from "@virtue/types";
 import { createProject, addScene, addShot } from "@virtue/storyboard-engine";
 import { createId, nowISO } from "@virtue/validation";
-import { store } from "./store";
+import { store } from "./store.js";
+import { orchestrator } from "./orchestrator.js";
 
 /**
  * Seed the in-memory store with realistic mock data
@@ -242,5 +243,6 @@ export function seedMockData() {
 
   for (const job of renderJobs) {
     store.saveRenderJob(job);
+    orchestrator.importJob(job);
   }
 }

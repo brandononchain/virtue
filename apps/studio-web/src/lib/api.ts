@@ -95,11 +95,23 @@ export const api = {
     request<VirtueRenderJob[]>(
       `/api/renders${projectId ? `?projectId=${projectId}` : ""}`
     ),
-  submitRender: (projectId: string, sceneId: string, shotId: string) =>
+  getRender: (id: string) =>
+    request<VirtueRenderJob>(`/api/renders/${id}`),
+  submitRender: (
+    projectId: string,
+    sceneId: string,
+    shotId: string,
+    provider?: string,
+    prompt?: string,
+  ) =>
     request<VirtueRenderJob>("/api/renders", {
       method: "POST",
-      body: JSON.stringify({ projectId, sceneId, shotId }),
+      body: JSON.stringify({ projectId, sceneId, shotId, provider, prompt }),
     }),
   pollRender: (id: string) =>
     request<VirtueRenderJob>(`/api/renders/${id}/poll`, { method: "POST" }),
+  listProviders: () =>
+    request<{ name: string; displayName: string; available: boolean }[]>(
+      "/api/renders/providers"
+    ),
 };
