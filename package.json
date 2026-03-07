@@ -1,0 +1,19 @@
+{
+  "name": "virtue",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Virtue — Studio-grade AI video generation platform",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "type-check": "turbo type-check",
+    "clean": "turbo clean",
+    "api:dev": "turbo dev --filter=@virtue/api",
+    "studio:dev": "turbo dev --filter=@virtue/studio-web"
+  },
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=20"
+  }
+}

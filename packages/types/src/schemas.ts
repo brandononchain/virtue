@@ -1,0 +1,139 @@
+import { z } from "zod";
+
+// ─── Skill ───────────────────────────────────────────────
+export const VirtueSkillSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  purpose: z.string(),
+  responsibilities: z.array(z.string()).default([]),
+  inputs: z.array(z.string()).default([]),
+  outputs: z.array(z.string()).default([]),
+  examples: z.array(z.string()).default([]),
+  raw: z.string().optional(),
+});
+export type VirtueSkill = z.infer<typeof VirtueSkillSchema>;
+
+// ─── Asset ───────────────────────────────────────────────
+export const VirtueAssetSchema = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  type: z.enum(["video", "image", "audio", "storyboard", "thumbnail"]),
+  url: z.string(),
+  filename: z.string(),
+  mimeType: z.string().optional(),
+  metadata: z.record(z.unknown()).default({}),
+  createdAt: z.string().datetime(),
+});
+export type VirtueAsset = z.infer<typeof VirtueAssetSchema>;
+
+// ─── Character ───────────────────────────────────────────
+export const VirtueCharacterSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().default(""),
+  appearance: z.string().default(""),
+  voiceNotes: z.string().default(""),
+  referenceAssets: z.array(z.string()).default([]),
+});
+export type VirtueCharacter = z.infer<typeof VirtueCharacterSchema>;
+
+// ─── Shot ────────────────────────────────────────────────
+export const VirtueShotSchema = z.object({
+  id: z.string(),
+  sceneId: z.string(),
+  order: z.number().int().min(0),
+  shotType: z.enum([
+    "wide", "medium", "close", "extreme-close",
+    "establishing", "over-shoulder", "pov", "aerial",
+  ]),
+  description: z.string(),
+  prompt: z.string().default(""),
+  durationSec: z.number().positive().default(4),
+  cameraMove: z.string().default("static"),
+  lens: z.string().default("50mm"),
+  lighting: z.string().default("natural"),
+  skills: z.array(z.string()).default([]),
+  characterIds: z.array(z.string()).default([]),
+  renderJobId: z.string().optional(),
+});
+export type VirtueShot = z.infer<typeof VirtueShotSchema>;
+
+// ─── Scene ───────────────────────────────────────────────
+export const VirtueSceneSchema = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  order: z.number().int().min(0),
+  title: z.string(),
+  description: z.string().default(""),
+  location: z.string().default(""),
+  timeOfDay: z.string().default("day"),
+  mood: z.string().default(""),
+  shots: z.array(VirtueShotSchema).default([]),
+  characters: z.array(z.string()).default([]),
+});
+export type VirtueScene = z.infer<typeof VirtueSceneSchema>;
+
+// ─── Render Job ──────────────────────────────────────────
+export const VirtueRenderJobSchema = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  shotId: z.string(),
+  provider: z.enum(["mock", "luma", "openai", "google"]),
+  status: z.enum([
+    "queued", "preparing", "generating",
+    "post-processing", "completed", "failed",
+  ]),
+  progress: z.number().min(0).max(100).default(0),
+  prompt: z.string(),
+  skills: z.array(z.string()).default([]),
+  output: VirtueAssetSchema.optional(),
+  error: z.string().optional(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+export type VirtueRenderJob = z.infer<typeof VirtueRenderJobSchema>;
+
+// ─── Timeline ────────────────────────────────────────────
+export const VirtueTimelineSchema = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  tracks: z.array(z.object({
+    id: z.string(),
+    label: z.string(),
+    clips: z.array(z.object({
+      shotId: z.string(),
+      startSec: z.number(),
+      durationSec: z.number(),
+      assetId: z.string().optional(),
+    })),
+  })).default([]),
+});
+export type VirtueTimeline = z.infer<typeof VirtueTimelineSchema>;
+
+// ─── Project ─────────────────────────────────────────────
+export const VirtueProjectSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().default(""),
+  screenplay: z.string().default(""),
+  scenes: z.array(VirtueSceneSchema).default([]),
+  characters: z.array(VirtueCharacterSchema).default([]),
+  assets: z.array(VirtueAssetSchema).default([]),
+  timeline: VirtueTimelineSchema.optional(),
+  provider: z.enum(["mock", "luma", "openai", "google"]).default("mock"),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+export type VirtueProject = z.infer<typeof VirtueProjectSchema>;
+
+// ─── Provider ────────────────────────────────────────────
+export const VirtueProviderSchema = z.object({
+  name: z.enum(["mock", "luma", "openai", "google"]),
+  displayName: z.string(),
+  capabilities: z.array(z.string()).default([]),
+  maxDurationSec: z.number().positive().default(10),
+  supportedResolutions: z.array(z.string()).default(["1080p"]),
+  enabled: z.boolean().default(false),
+});
+export type VirtueProvider = z.infer<typeof VirtueProviderSchema>;
