@@ -443,3 +443,77 @@ export const VirtueRoutingPolicySchema = z.object({
   preferredProvider: z.enum(["mock", "luma", "openai", "google"]).optional(),
 });
 export type VirtueRoutingPolicy = z.infer<typeof VirtueRoutingPolicySchema>;
+
+// ─── Comment ────────────────────────────────────────────
+export const VirtueCommentSchema = z.object({
+  id: z.string(),
+  targetType: z.enum(["project", "scene", "shot", "render", "timeline", "export"]),
+  targetId: z.string(),
+  authorName: z.string().default("Anonymous"),
+  authorId: z.string().optional(),
+  body: z.string(),
+  parentCommentId: z.string().optional(),
+  createdAt: z.string().datetime(),
+  resolvedAt: z.string().datetime().optional(),
+});
+export type VirtueComment = z.infer<typeof VirtueCommentSchema>;
+
+// ─── Approval ───────────────────────────────────────────
+export const VirtueApprovalSchema = z.object({
+  targetType: z.enum(["project", "scene", "shot", "render", "timeline", "export"]),
+  targetId: z.string(),
+  state: z.enum(["pending", "needs_changes", "approved", "rejected"]),
+  reviewerName: z.string().optional(),
+  notes: z.string().optional(),
+  updatedAt: z.string().datetime(),
+});
+export type VirtueApproval = z.infer<typeof VirtueApprovalSchema>;
+
+// ─── Alternate Take ─────────────────────────────────────
+export const VirtueAlternateTakeSchema = z.object({
+  id: z.string(),
+  shotId: z.string(),
+  renderJobId: z.string(),
+  provider: z.enum(["mock", "luma", "openai", "google"]),
+  promptVersion: z.string(),
+  continuityContextVersion: z.string().optional(),
+  routingDecision: VirtueRoutingDecisionSchema.optional(),
+  status: z.enum(["active", "selected", "favorite", "archived"]).default("active"),
+  label: z.string().optional(),
+  createdAt: z.string().datetime(),
+});
+export type VirtueAlternateTake = z.infer<typeof VirtueAlternateTakeSchema>;
+
+// ─── Version Snapshot ───────────────────────────────────
+export const VirtueVersionSnapshotSchema = z.object({
+  id: z.string(),
+  targetType: z.enum(["project", "scene", "shot", "render", "timeline", "export"]),
+  targetId: z.string(),
+  summary: z.string(),
+  metadata: z.record(z.unknown()).default({}),
+  createdAt: z.string().datetime(),
+});
+export type VirtueVersionSnapshot = z.infer<typeof VirtueVersionSnapshotSchema>;
+
+// ─── Compare Session ────────────────────────────────────
+export const VirtueCompareSessionSchema = z.object({
+  id: z.string(),
+  renderIds: z.array(z.string()).min(2),
+  winnerId: z.string().optional(),
+  notes: z.string().optional(),
+  metadata: z.record(z.unknown()).default({}),
+  createdAt: z.string().datetime(),
+});
+export type VirtueCompareSession = z.infer<typeof VirtueCompareSessionSchema>;
+
+// ─── Workflow Status ────────────────────────────────────
+export const VirtueWorkflowStatusSchema = z.object({
+  targetType: z.enum(["project", "scene"]),
+  targetId: z.string(),
+  stage: z.enum([
+    "concept", "planning", "previz", "rendering",
+    "review", "approved", "final_exported", "archived",
+  ]),
+  updatedAt: z.string().datetime(),
+});
+export type VirtueWorkflowStatus = z.infer<typeof VirtueWorkflowStatusSchema>;

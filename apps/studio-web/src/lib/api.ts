@@ -15,6 +15,12 @@ import type {
   VirtueRoutingDecision,
   VirtueProviderCapabilities,
   VirtueRoutingPolicy,
+  VirtueComment,
+  VirtueApproval,
+  VirtueAlternateTake,
+  VirtueVersionSnapshot,
+  VirtueCompareSession,
+  VirtueWorkflowStatus,
 } from "@virtue/types";
 
 interface EnrichmentResult {
@@ -362,4 +368,80 @@ export const api = {
     request<Record<string, VirtueRoutingPolicy>>("/api/routing/policies"),
   getRenderRouting: (renderJobId: string) =>
     request<VirtueRoutingDecision>(`/api/routing/renders/${renderJobId}`),
+
+  // ─── Review & Collaboration ────────────────────────────
+
+  // Comments
+  listComments: (targetType: string, targetId: string) =>
+    request<VirtueComment[]>(`/api/review/comments/${targetType}/${targetId}`),
+  addComment: (data: { targetType: string; targetId: string; body: string; authorName?: string; parentCommentId?: string }) =>
+    request<VirtueComment>("/api/review/comments", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  resolveComment: (commentId: string) =>
+    request<VirtueComment>(`/api/review/comments/${commentId}/resolve`, { method: "POST" }),
+  reopenComment: (commentId: string) =>
+    request<VirtueComment>(`/api/review/comments/${commentId}/reopen`, { method: "POST" }),
+
+  // Approvals
+  getApproval: (targetType: string, targetId: string) =>
+    request<VirtueApproval>(`/api/review/approvals/${targetType}/${targetId}`),
+  setApproval: (data: { targetType: string; targetId: string; state: string; reviewerName?: string; notes?: string }) =>
+    request<VirtueApproval>("/api/review/approvals", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  // Alternate Takes
+  listTakes: (shotId: string) =>
+    request<VirtueAlternateTake[]>(`/api/review/shots/${shotId}/takes`),
+  createTake: (shotId: string, data: { renderJobId: string; provider: string; promptVersion: string; label?: string }) =>
+    request<VirtueAlternateTake>(`/api/review/shots/${shotId}/takes`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  selectTake: (shotId: string, takeId: string) =>
+    request<VirtueAlternateTake>(`/api/review/shots/${shotId}/takes/${takeId}/select`, { method: "POST" }),
+  favoriteTake: (shotId: string, takeId: string) =>
+    request<VirtueAlternateTake>(`/api/review/shots/${shotId}/takes/${takeId}/favorite`, { method: "POST" }),
+  archiveTake: (shotId: string, takeId: string) =>
+    request<VirtueAlternateTake>(`/api/review/shots/${shotId}/takes/${takeId}/archive`, { method: "POST" }),
+
+  // Version History
+  listVersions: (targetType: string, targetId: string) =>
+    request<VirtueVersionSnapshot[]>(`/api/review/versions/${targetType}/${targetId}`),
+  createVersionSnapshot: (data: { targetType: string; targetId: string; summary: string; metadata?: Record<string, unknown> }) =>
+    request<VirtueVersionSnapshot>("/api/review/versions/snapshot", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  // Compare
+  createCompareSession: (data: { renderIds: string[]; notes?: string }) =>
+    request<VirtueCompareSession>("/api/review/compare", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  getCompareSession: (id: string) =>
+    request<VirtueCompareSession>(`/api/review/compare/${id}`),
+  selectCompareWinner: (id: string, winnerId: string) =>
+    request<VirtueCompareSession>(`/api/review/compare/${id}/winner`, {
+      method: "POST",
+      body: JSON.stringify({ winnerId }),
+    }),
+
+  // Workflow
+  getWorkflowStage: (targetType: string, targetId: string) =>
+    request<VirtueWorkflowStatus>(`/api/review/workflow/${targetType}/${targetId}`),
+  setWorkflowStage: (data: { targetType: string; targetId: string; stage: string }) =>
+    request<VirtueWorkflowStatus>("/api/review/workflow/stage", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  advanceWorkflow: (data: { targetType: string; targetId: string }) =>
+    request<VirtueWorkflowStatus>("/api/review/workflow/advance", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 };

@@ -47,6 +47,9 @@ importers:
       '@virtue/render-orchestrator':
         specifier: workspace:*
         version: link:../../packages/render-orchestrator
+      '@virtue/review-engine':
+        specifier: workspace:*
+        version: link:../../packages/review-engine
       '@virtue/routing-engine':
         specifier: workspace:*
         version: link:../../packages/routing-engine
@@ -229,6 +232,19 @@ importers:
       '@virtue/provider-sdk':
         specifier: workspace:*
         version: link:../provider-sdk
+      '@virtue/types':
+        specifier: workspace:*
+        version: link:../types
+      '@virtue/validation':
+        specifier: workspace:*
+        version: link:../validation
+    devDependencies:
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
+  packages/review-engine:
+    dependencies:
       '@virtue/types':
         specifier: workspace:*
         version: link:../types

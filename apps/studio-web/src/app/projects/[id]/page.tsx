@@ -10,6 +10,10 @@ import type {
   VirtueScene,
   VirtueRenderJob,
   VirtueRoutingDecision,
+  VirtueComment,
+  VirtueApproval,
+  VirtueAlternateTake,
+  VirtueWorkflowStatus,
 } from "@virtue/types";
 
 interface ProviderInfo {
@@ -25,6 +29,28 @@ const ROUTING_MODES = [
   { value: "auto_cost", label: "Cost", desc: "Minimize generation cost" },
   { value: "manual", label: "Manual", desc: "Choose provider yourself" },
 ] as const;
+
+const APPROVAL_STATES = [
+  { value: "pending", label: "Pending", color: "text-zinc-500 bg-zinc-800/60 border-zinc-700/40" },
+  { value: "needs_changes", label: "Changes", color: "text-amber-400 bg-amber-950/30 border-amber-800/40" },
+  { value: "approved", label: "Approved", color: "text-emerald-400 bg-emerald-950/30 border-emerald-800/40" },
+  { value: "rejected", label: "Rejected", color: "text-red-400 bg-red-950/30 border-red-800/40" },
+] as const;
+
+const WORKFLOW_STAGES = [
+  "concept", "planning", "previz", "rendering", "review", "approved", "final_exported", "archived",
+] as const;
+
+const STAGE_COLORS: Record<string, string> = {
+  concept: "bg-zinc-700",
+  planning: "bg-blue-700",
+  previz: "bg-purple-700",
+  rendering: "bg-amber-600",
+  review: "bg-cyan-600",
+  approved: "bg-emerald-600",
+  final_exported: "bg-green-500",
+  archived: "bg-zinc-600",
+};
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -46,6 +72,14 @@ export default function ProjectDetailPage() {
   const [routingDecision, setRoutingDecision] = useState<VirtueRoutingDecision | null>(null);
   const [loadingRouting, setLoadingRouting] = useState(false);
 
+  // Review state
+  const [comments, setComments] = useState<VirtueComment[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [shotApproval, setShotApproval] = useState<VirtueApproval | null>(null);
+  const [takes, setTakes] = useState<VirtueAlternateTake[]>([]);
+  const [projectWorkflow, setProjectWorkflow] = useState<VirtueWorkflowStatus | null>(null);
+  const [showComments, setShowComments] = useState(false);
+
   // Scene creation
   const [showAddScene, setShowAddScene] = useState(false);
   const [sceneTitle, setSceneTitle] = useState("");
@@ -63,7 +97,10 @@ export default function ProjectDetailPage() {
   const [shotLighting, setShotLighting] = useState("natural");
 
   useEffect(() => {
-    if (id) api.getProject(id).then(setProject).catch(() => {});
+    if (id) {
+      api.getProject(id).then(setProject).catch(() => {});
+      api.getWorkflowStage("project", id).then(setProjectWorkflow).catch(() => {});
+    }
     api.listProviders().then(setProviders).catch(() => {});
   }, [id]);
 
@@ -71,7 +108,7 @@ export default function ProjectDetailPage() {
   const [enrichedPrompt, setEnrichedPrompt] = useState<string>("");
   const [continuityFragment, setContinuityFragment] = useState<string>("");
 
-  // When selecting a shot, fetch enriched prompt AND routing recommendation
+  // When selecting a shot, fetch enriched prompt, routing, comments, approval, takes
   useEffect(() => {
     if (selectedShot && project) {
       setRenderStatus(null);
@@ -90,8 +127,12 @@ export default function ProjectDetailPage() {
           setContinuityFragment("");
         });
 
-      // Fetch routing recommendation
       fetchRoutingRecommendation(selectedShot.scene.id, selectedShot.shot.id);
+
+      // Fetch review data
+      api.listComments("shot", selectedShot.shot.id).then(setComments).catch(() => setComments([]));
+      api.getApproval("shot", selectedShot.shot.id).then(setShotApproval).catch(() => setShotApproval(null));
+      api.listTakes(selectedShot.shot.id).then(setTakes).catch(() => setTakes([]));
     }
   }, [selectedShot?.shot.id]);
 
@@ -113,7 +154,6 @@ export default function ProjectDetailPage() {
         policy: routingMode,
       });
       setRoutingDecision(decision);
-      // Auto-select the recommended provider
       setRenderProvider(decision.selectedProvider);
     } catch {
       setRoutingDecision(null);
@@ -172,6 +212,15 @@ export default function ProjectDetailPage() {
         isManual ? undefined : routingMode,
       );
       setRenderStatus(job);
+
+      // Auto-create alternate take
+      api.createTake(shotId, {
+        renderJobId: job.id,
+        provider: job.provider,
+        promptVersion: renderPrompt,
+        label: `Take ${takes.length + 1}`,
+      }).then((take) => setTakes((prev) => [...prev, take])).catch(() => {});
+
       if (job.status !== "completed" && job.status !== "failed") {
         pollRenderJob(job.id);
       }
@@ -208,6 +257,48 @@ export default function ProjectDetailPage() {
     }, 5000);
   }
 
+  async function handleAddComment() {
+    if (!newComment.trim() || !selectedShot) return;
+    const comment = await api.addComment({
+      targetType: "shot",
+      targetId: selectedShot.shot.id,
+      body: newComment,
+      authorName: "Director",
+    });
+    setComments((prev) => [...prev, comment]);
+    setNewComment("");
+  }
+
+  async function handleResolveComment(commentId: string) {
+    const updated = await api.resolveComment(commentId);
+    setComments((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+  }
+
+  async function handleSetApproval(state: string) {
+    if (!selectedShot) return;
+    const approval = await api.setApproval({
+      targetType: "shot",
+      targetId: selectedShot.shot.id,
+      state,
+      reviewerName: "Director",
+    });
+    setShotApproval(approval);
+  }
+
+  async function handleSelectTake(takeId: string) {
+    if (!selectedShot) return;
+    const updated = await api.selectTake(selectedShot.shot.id, takeId);
+    setTakes((prev) => prev.map((t) =>
+      t.id === updated.id ? updated : t.shotId === updated.shotId && t.status === "selected" ? { ...t, status: "active" as const } : t
+    ));
+  }
+
+  async function handleAdvanceWorkflow() {
+    if (!project) return;
+    const status = await api.advanceWorkflow({ targetType: "project", targetId: project.id });
+    setProjectWorkflow(status);
+  }
+
   if (!project) {
     return (
       <div className="p-8">
@@ -217,6 +308,9 @@ export default function ProjectDetailPage() {
   }
 
   const totalShots = project.scenes.reduce((n, s) => n + s.shots.length, 0);
+  const currentStageIdx = projectWorkflow
+    ? WORKFLOW_STAGES.indexOf(projectWorkflow.stage as any)
+    : 0;
 
   return (
     <div className="flex h-full">
@@ -240,9 +334,31 @@ export default function ProjectDetailPage() {
               </p>
             )}
           </div>
-          <span className="rounded bg-zinc-800 px-2 py-1 text-[10px] text-zinc-500 font-mono uppercase">
-            {project.provider}
-          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleAdvanceWorkflow}
+              className={`rounded px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider text-white/80 hover:text-white transition-colors ${STAGE_COLORS[projectWorkflow?.stage || "concept"]}`}
+              title="Click to advance workflow stage"
+            >
+              {projectWorkflow?.stage || "concept"}
+            </button>
+            <span className="rounded bg-zinc-800 px-2 py-1 text-[10px] text-zinc-500 font-mono uppercase">
+              {project.provider}
+            </span>
+          </div>
+        </div>
+
+        {/* Workflow Progress Bar */}
+        <div className="flex gap-0.5 rounded-lg overflow-hidden">
+          {WORKFLOW_STAGES.map((stage, i) => (
+            <div
+              key={stage}
+              className={`h-1.5 flex-1 transition-colors ${
+                i <= currentStageIdx ? STAGE_COLORS[stage] : "bg-zinc-800/60"
+              }`}
+              title={stage}
+            />
+          ))}
         </div>
 
         {/* Stats */}
@@ -360,6 +476,12 @@ export default function ProjectDetailPage() {
                         )}
                       </div>
                     </div>
+                    <Link
+                      href={`/projects/${project.id}/scenes/${scene.id}/editor`}
+                      className="text-[10px] text-zinc-600 hover:text-purple-400 transition-colors uppercase tracking-wider"
+                    >
+                      Editor
+                    </Link>
                     <Link
                       href={`/projects/${project.id}/scenes/${scene.id}/timeline`}
                       className="text-[10px] text-zinc-600 hover:text-emerald-400 transition-colors uppercase tracking-wider"
@@ -496,15 +618,50 @@ export default function ProjectDetailPage() {
             <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
               Shot Detail
             </h2>
-            <button
-              onClick={() => setSelectedShot(null)}
-              className="text-zinc-600 hover:text-zinc-300 text-xs transition-colors"
-            >
-              Close
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowComments(!showComments)}
+                className={`text-[10px] uppercase tracking-wider transition-colors ${
+                  showComments ? "text-cyan-400" : "text-zinc-600 hover:text-zinc-300"
+                }`}
+              >
+                Comments{comments.length > 0 ? ` (${comments.length})` : ""}
+              </button>
+              <button
+                onClick={() => setSelectedShot(null)}
+                className="text-zinc-600 hover:text-zinc-300 text-xs transition-colors"
+              >
+                Close
+              </button>
+            </div>
           </div>
 
           <div className="p-5 space-y-5">
+            {/* Approval Badge */}
+            <div>
+              <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                Approval Status
+              </label>
+              <div className="flex gap-1">
+                {APPROVAL_STATES.map((as) => (
+                  <button
+                    key={as.value}
+                    onClick={() => handleSetApproval(as.value)}
+                    className={`flex-1 rounded-md py-1.5 text-[9px] uppercase tracking-wider font-medium border transition-all ${
+                      (shotApproval?.state || "pending") === as.value
+                        ? as.color
+                        : "bg-zinc-900/40 border-zinc-800/60 text-zinc-600 hover:border-zinc-600"
+                    }`}
+                  >
+                    {as.label}
+                  </button>
+                ))}
+              </div>
+              {shotApproval?.notes && (
+                <p className="text-[10px] text-zinc-500 mt-1 italic">{shotApproval.notes}</p>
+              )}
+            </div>
+
             {/* Render Result Video */}
             {renderStatus?.output?.url && renderStatus.status === "completed" && (
               <div>
@@ -556,6 +713,56 @@ export default function ProjectDetailPage() {
                 </div>
                 {renderStatus.error && (
                   <p className="text-xs text-red-400 mt-1.5">{renderStatus.error}</p>
+                )}
+              </div>
+            )}
+
+            {/* Alternate Takes */}
+            {takes.length > 0 && (
+              <div>
+                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                  Takes ({takes.length})
+                </label>
+                <div className="space-y-1">
+                  {takes.filter((t) => t.status !== "archived").map((take) => (
+                    <button
+                      key={take.id}
+                      onClick={() => handleSelectTake(take.id)}
+                      className={`w-full flex items-center gap-2 rounded px-2.5 py-1.5 text-left transition-all border ${
+                        take.status === "selected"
+                          ? "bg-emerald-950/20 border-emerald-900/30"
+                          : take.status === "favorite"
+                            ? "bg-amber-950/20 border-amber-900/30"
+                            : "bg-zinc-900/30 border-zinc-800/40 hover:border-zinc-700"
+                      }`}
+                    >
+                      <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${
+                        take.status === "selected" ? "bg-emerald-400"
+                        : take.status === "favorite" ? "bg-amber-400"
+                        : "bg-zinc-500"
+                      }`} />
+                      <span className="text-[10px] text-zinc-300 flex-1">
+                        {take.label || take.id.slice(0, 12)}
+                      </span>
+                      <span className="text-[9px] text-zinc-600 font-mono uppercase">
+                        {take.provider}
+                      </span>
+                      {take.status === "selected" && (
+                        <span className="text-[8px] text-emerald-500 uppercase">active</span>
+                      )}
+                      {take.status === "favorite" && (
+                        <span className="text-[8px] text-amber-500 uppercase">fav</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                {takes.length >= 2 && (
+                  <Link
+                    href={`/studio/compare/new?renders=${takes.map((t) => t.renderJobId).join(",")}`}
+                    className="block mt-2 text-center text-[10px] text-cyan-500 hover:text-cyan-400 uppercase tracking-wider transition-colors"
+                  >
+                    Compare Takes
+                  </Link>
                 )}
               </div>
             )}
@@ -633,7 +840,6 @@ export default function ProjectDetailPage() {
                   </div>
                 ) : routingDecision ? (
                   <div className="space-y-2">
-                    {/* Recommended provider badge */}
                     <div className="bg-cyan-950/20 border border-cyan-900/30 rounded-md p-3">
                       <div className="flex items-center gap-2 mb-1.5">
                         <span className="h-2 w-2 rounded-full bg-cyan-400 shrink-0" />
@@ -649,7 +855,6 @@ export default function ProjectDetailPage() {
                       </p>
                     </div>
 
-                    {/* Scored alternatives */}
                     <div className="space-y-1">
                       {routingDecision.scores.map((score) => (
                         <button
@@ -780,6 +985,70 @@ export default function ProjectDetailPage() {
                   ? `Render with ${renderProvider}`
                   : `Render (${routingMode.replace("auto_", "").replace("_", " ")})`}
             </button>
+
+            {/* Comments Panel */}
+            {showComments && (
+              <div>
+                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                  Comments
+                </label>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {comments.length === 0 ? (
+                    <p className="text-[10px] text-zinc-600 italic">No comments yet.</p>
+                  ) : (
+                    comments.map((comment) => (
+                      <div
+                        key={comment.id}
+                        className={`rounded-md p-2.5 border ${
+                          comment.resolvedAt
+                            ? "bg-zinc-900/20 border-zinc-800/30 opacity-60"
+                            : "bg-zinc-900/40 border-zinc-800/50"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[10px] text-zinc-400 font-medium">
+                            {comment.authorName}
+                          </span>
+                          <span className="text-[9px] text-zinc-700">
+                            {new Date(comment.createdAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                          </span>
+                          {comment.resolvedAt ? (
+                            <span className="ml-auto text-[8px] text-emerald-600 uppercase">Resolved</span>
+                          ) : (
+                            <button
+                              onClick={() => handleResolveComment(comment.id)}
+                              className="ml-auto text-[8px] text-zinc-600 hover:text-emerald-400 uppercase transition-colors"
+                            >
+                              Resolve
+                            </button>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-zinc-300 leading-relaxed">
+                          {comment.body}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <div className="flex gap-2 mt-2">
+                  <input
+                    type="text"
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
+                    placeholder="Add a comment..."
+                    className="flex-1 rounded border border-zinc-800 bg-zinc-900 px-2.5 py-1.5 text-xs text-zinc-200 placeholder-zinc-600 focus:border-zinc-600 focus:outline-none"
+                  />
+                  <button
+                    onClick={handleAddComment}
+                    disabled={!newComment.trim()}
+                    className="rounded bg-zinc-700 px-3 py-1.5 text-xs text-zinc-200 hover:bg-zinc-600 disabled:opacity-40 transition-colors"
+                  >
+                    Post
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

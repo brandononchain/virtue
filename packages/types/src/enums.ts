@@ -125,3 +125,41 @@ export const CostTier = {
   HIGH: "high",
 } as const;
 export type CostTier = (typeof CostTier)[keyof typeof CostTier];
+
+export const ApprovalState = {
+  PENDING: "pending",
+  NEEDS_CHANGES: "needs_changes",
+  APPROVED: "approved",
+  REJECTED: "rejected",
+} as const;
+export type ApprovalState = (typeof ApprovalState)[keyof typeof ApprovalState];
+
+export const WorkflowStage = {
+  CONCEPT: "concept",
+  PLANNING: "planning",
+  PREVIZ: "previz",
+  RENDERING: "rendering",
+  REVIEW: "review",
+  APPROVED: "approved",
+  FINAL_EXPORTED: "final_exported",
+  ARCHIVED: "archived",
+} as const;
+export type WorkflowStage = (typeof WorkflowStage)[keyof typeof WorkflowStage];
+
+export const ReviewTargetType = {
+  PROJECT: "project",
+  SCENE: "scene",
+  SHOT: "shot",
+  RENDER: "render",
+  TIMELINE: "timeline",
+  EXPORT: "export",
+} as const;
+export type ReviewTargetType = (typeof ReviewTargetType)[keyof typeof ReviewTargetType];
+
+export const TakeStatus = {
+  ACTIVE: "active",
+  SELECTED: "selected",
+  FAVORITE: "favorite",
+  ARCHIVED: "archived",
+} as const;
+export type TakeStatus = (typeof TakeStatus)[keyof typeof TakeStatus];
