@@ -163,3 +163,21 @@ export const TakeStatus = {
   ARCHIVED: "archived",
 } as const;
 export type TakeStatus = (typeof TakeStatus)[keyof typeof TakeStatus];
+
+export const SuggestionType = {
+  ADD_SHOT: "add_shot",
+  TRIM_SHOT: "trim_shot",
+  REORDER: "reorder",
+  ADD_TRANSITION: "add_transition",
+  PROMPT_IMPROVEMENT: "prompt_improvement",
+  RETRY_RENDER: "retry_render",
+  PACING_ADJUSTMENT: "pacing_adjustment",
+} as const;
+export type SuggestionType = (typeof SuggestionType)[keyof typeof SuggestionType];
+
+export const SuggestionPriority = {
+  LOW: "low",
+  MEDIUM: "medium",
+  HIGH: "high",
+} as const;
+export type SuggestionPriority = (typeof SuggestionPriority)[keyof typeof SuggestionPriority];

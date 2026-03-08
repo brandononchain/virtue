@@ -9,6 +9,7 @@ import { continuityRoutes } from "./routes/continuity";
 import { editorRoutes } from "./routes/editor";
 import { routingRoutes } from "./routes/routing";
 import { reviewRoutes } from "./routes/review";
+import { autonomousRoutes } from "./routes/autonomous";
 import { store } from "./services/store";
 
 export const app = new Hono();
@@ -54,3 +55,4 @@ app.route("/api/continuity", continuityRoutes);
 app.route("/api/editor", editorRoutes);
 app.route("/api/routing", routingRoutes);
 app.route("/api/review", reviewRoutes);
+app.route("/api/autonomous", autonomousRoutes);

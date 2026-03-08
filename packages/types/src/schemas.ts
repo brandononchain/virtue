@@ -517,3 +517,86 @@ export const VirtueWorkflowStatusSchema = z.object({
   updatedAt: z.string().datetime(),
 });
 export type VirtueWorkflowStatus = z.infer<typeof VirtueWorkflowStatusSchema>;
+
+// ─── Scene Analysis ────────────────────────────────────
+export const VirtueSceneAnalysisSchema = z.object({
+  sceneId: z.string(),
+  totalDuration: z.number(),
+  shotCount: z.number(),
+  avgShotDuration: z.number(),
+  shotTypeDistribution: z.record(z.number()),
+  cameraVariety: z.number().min(0).max(1),
+  pacingScore: z.number().min(0).max(1),
+  visualDiversity: z.number().min(0).max(1),
+  continuityCoverage: z.number().min(0).max(1),
+  suggestions: z.array(z.object({
+    id: z.string(),
+    type: z.enum([
+      "add_shot", "trim_shot", "reorder",
+      "add_transition", "prompt_improvement",
+      "retry_render", "pacing_adjustment",
+    ]),
+    priority: z.enum(["low", "medium", "high"]),
+    title: z.string(),
+    description: z.string(),
+    metadata: z.record(z.unknown()).default({}),
+  })),
+  analyzedAt: z.string().datetime(),
+});
+export type VirtueSceneAnalysis = z.infer<typeof VirtueSceneAnalysisSchema>;
+
+// ─── Shot Suggestion ───────────────────────────────────
+export const VirtueShotSuggestionSchema = z.object({
+  id: z.string(),
+  sceneId: z.string(),
+  shotType: z.enum([
+    "wide", "medium", "close", "extreme-close",
+    "establishing", "over-shoulder", "pov", "aerial",
+  ]),
+  description: z.string(),
+  promptSuggestion: z.string(),
+  durationSec: z.number().positive(),
+  cameraMove: z.string().default("static"),
+  reason: z.string(),
+  insertAfterShotId: z.string().optional(),
+  recommendedSkills: z.array(z.string()).default([]),
+  recommendedProvider: z.string().optional(),
+  priority: z.enum(["low", "medium", "high"]).default("medium"),
+});
+export type VirtueShotSuggestion = z.infer<typeof VirtueShotSuggestionSchema>;
+
+// ─── Prompt Improvement ────────────────────────────────
+export const VirtuePromptImprovementSchema = z.object({
+  id: z.string(),
+  shotId: z.string(),
+  originalPrompt: z.string(),
+  improvedPrompt: z.string(),
+  changes: z.array(z.string()),
+  reason: z.string(),
+  suggestedProvider: z.string().optional(),
+});
+export type VirtuePromptImprovement = z.infer<typeof VirtuePromptImprovementSchema>;
+
+// ─── Highlight Clip ────────────────────────────────────
+export const VirtueHighlightSchema = z.object({
+  id: z.string(),
+  sceneId: z.string(),
+  shotId: z.string(),
+  score: z.number().min(0).max(1),
+  reason: z.string(),
+  tags: z.array(z.string()).default([]),
+  durationSec: z.number(),
+});
+export type VirtueHighlight = z.infer<typeof VirtueHighlightSchema>;
+
+// ─── Trailer Plan ──────────────────────────────────────
+export const VirtueTrailerPlanSchema = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  title: z.string(),
+  highlights: z.array(VirtueHighlightSchema),
+  totalDuration: z.number(),
+  pacingPreset: z.enum(["cinematic", "slow-burn", "fast-cut", "trailer"]).default("trailer"),
+  createdAt: z.string().datetime(),
+});
+export type VirtueTrailerPlan = z.infer<typeof VirtueTrailerPlanSchema>;

@@ -21,6 +21,11 @@ import type {
   VirtueVersionSnapshot,
   VirtueCompareSession,
   VirtueWorkflowStatus,
+  VirtueSceneAnalysis,
+  VirtueShotSuggestion,
+  VirtuePromptImprovement,
+  VirtueHighlight,
+  VirtueTrailerPlan,
 } from "@virtue/types";
 
 interface EnrichmentResult {
@@ -443,5 +448,43 @@ export const api = {
     request<VirtueWorkflowStatus>("/api/review/workflow/advance", {
       method: "POST",
       body: JSON.stringify(data),
+    }),
+
+  // ─── Autonomous Engine ─────────────────────────────────
+
+  analyzeScene: (projectId: string, sceneId: string) =>
+    request<VirtueSceneAnalysis>("/api/autonomous/analyze-scene", {
+      method: "POST",
+      body: JSON.stringify({ projectId, sceneId }),
+    }),
+  suggestShots: (projectId: string, sceneId: string) =>
+    request<VirtueShotSuggestion[]>("/api/autonomous/suggest-shots", {
+      method: "POST",
+      body: JSON.stringify({ projectId, sceneId }),
+    }),
+  improvePrompt: (projectId: string, sceneId: string, shotId: string) =>
+    request<VirtuePromptImprovement>("/api/autonomous/improve-prompt", {
+      method: "POST",
+      body: JSON.stringify({ projectId, sceneId, shotId }),
+    }),
+  retryRender: (projectId: string, sceneId: string, shotId: string, renderId?: string) =>
+    request<{ improvedPrompt: VirtuePromptImprovement; suggestedProvider?: string; suggestedDuration?: number }>(
+      "/api/autonomous/retry-render",
+      { method: "POST", body: JSON.stringify({ projectId, sceneId, shotId, renderId }) },
+    ),
+  optimizePacing: (projectId: string, sceneId: string) =>
+    request<{ sceneId: string; currentAvgDuration: number; targetAvgDuration: number; overallPacingScore: number; adjustments: { shotId: string; currentDuration: number; suggestedDuration: number; reason: string }[]; reorderSuggestion: string | null }>(
+      "/api/autonomous/optimize-pacing",
+      { method: "POST", body: JSON.stringify({ projectId, sceneId }) },
+    ),
+  extractHighlights: (projectId: string, sceneId: string) =>
+    request<VirtueHighlight[]>("/api/autonomous/extract-highlights", {
+      method: "POST",
+      body: JSON.stringify({ projectId, sceneId }),
+    }),
+  generateTrailer: (projectId: string, title?: string) =>
+    request<VirtueTrailerPlan>("/api/autonomous/generate-trailer", {
+      method: "POST",
+      body: JSON.stringify({ projectId, title }),
     }),
 };

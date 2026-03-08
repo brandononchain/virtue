@@ -144,6 +144,28 @@ export function Sidebar() {
           </Link>
         </div>
 
+        {/* Autonomous Section */}
+        <div className="mt-4 pt-3 border-t border-zinc-800/40">
+          <p className="px-3 mb-2 text-[9px] text-zinc-600 uppercase tracking-widest font-semibold">
+            Intelligence
+          </p>
+          <Link
+            href="/studio/autonomous"
+            className={`flex items-center gap-3 rounded-md px-3 py-2 text-[13px] transition-colors ${
+              pathname.startsWith("/studio/autonomous")
+                ? "bg-zinc-800/60 text-zinc-100 font-medium"
+                : "text-zinc-500 hover:bg-zinc-800/30 hover:text-zinc-300"
+            }`}
+          >
+            <span className="w-4 h-4 shrink-0 opacity-70">
+              <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+                <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 1.5a5.5 5.5 0 110 11 5.5 5.5 0 010-11zM8 4a1 1 0 100 2 1 1 0 000-2zm-.75 3.5v4.5h1.5V7.5h-1.5z" />
+              </svg>
+            </span>
+            Autonomous
+          </Link>
+        </div>
+
         {/* Continuity Section */}
         <div className="mt-4 pt-3 border-t border-zinc-800/40">
           <p className="px-3 mb-2 text-[9px] text-zinc-600 uppercase tracking-widest font-semibold">

@@ -20,6 +20,9 @@ importers:
       '@virtue/asset-storage':
         specifier: workspace:*
         version: link:../../packages/asset-storage
+      '@virtue/autonomous-engine':
+        specifier: workspace:*
+        version: link:../../packages/autonomous-engine
       '@virtue/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -149,6 +152,16 @@ importers:
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.37
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
+  packages/autonomous-engine:
+    dependencies:
+      '@virtue/types':
+        specifier: workspace:*
+        version: link:../types
+    devDependencies:
       typescript:
         specifier: ^5.5.0
         version: 5.9.3
