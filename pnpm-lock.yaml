@@ -6,16 +6,41 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      turbo:
+        specifier: ^2.8.14
+        version: 2.8.14
 
   apps/api:
     dependencies:
       '@hono/node-server':
         specifier: ^1.12.0
         version: 1.19.11(hono@4.12.5)
+      '@virtue/asset-storage':
+        specifier: workspace:*
+        version: link:../../packages/asset-storage
+      '@virtue/autonomous-engine':
+        specifier: workspace:*
+        version: link:../../packages/autonomous-engine
       '@virtue/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@virtue/continuity-engine':
+        specifier: workspace:*
+        version: link:../../packages/continuity-engine
+      '@virtue/director-engine':
+        specifier: workspace:*
+        version: link:../../packages/director-engine
+      '@virtue/editor-engine':
+        specifier: workspace:*
+        version: link:../../packages/editor-engine
+      '@virtue/media-utils':
+        specifier: workspace:*
+        version: link:../../packages/media-utils
+      '@virtue/provider-luma':
+        specifier: workspace:*
+        version: link:../../providers/luma
       '@virtue/provider-mock':
         specifier: workspace:*
         version: link:../../providers/mock
@@ -25,12 +50,24 @@ importers:
       '@virtue/render-orchestrator':
         specifier: workspace:*
         version: link:../../packages/render-orchestrator
+      '@virtue/review-engine':
+        specifier: workspace:*
+        version: link:../../packages/review-engine
+      '@virtue/routing-engine':
+        specifier: workspace:*
+        version: link:../../packages/routing-engine
+      '@virtue/simulation-engine':
+        specifier: workspace:*
+        version: link:../../packages/simulation-engine
       '@virtue/skills-engine':
         specifier: workspace:*
         version: link:../../packages/skills-engine
       '@virtue/storyboard-engine':
         specifier: workspace:*
         version: link:../../packages/storyboard-engine
+      '@virtue/timeline-engine':
+        specifier: workspace:*
+        version: link:../../packages/timeline-engine
       '@virtue/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -106,7 +143,88 @@ importers:
         specifier: ^5.5.0
         version: 5.9.3
 
+  packages/asset-storage:
+    dependencies:
+      '@virtue/types':
+        specifier: workspace:*
+        version: link:../types
+      '@virtue/validation':
+        specifier: workspace:*
+        version: link:../validation
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.37
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
+  packages/autonomous-engine:
+    dependencies:
+      '@virtue/types':
+        specifier: workspace:*
+        version: link:../types
+    devDependencies:
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
   packages/config:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.37
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
+  packages/continuity-engine:
+    dependencies:
+      '@virtue/types':
+        specifier: workspace:*
+        version: link:../types
+      '@virtue/validation':
+        specifier: workspace:*
+        version: link:../validation
+    devDependencies:
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
+  packages/director-engine:
+    dependencies:
+      '@virtue/types':
+        specifier: workspace:*
+        version: link:../types
+      '@virtue/validation':
+        specifier: workspace:*
+        version: link:../validation
+    devDependencies:
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
+  packages/editor-engine:
+    dependencies:
+      '@virtue/types':
+        specifier: workspace:*
+        version: link:../types
+      '@virtue/validation':
+        specifier: workspace:*
+        version: link:../validation
+    devDependencies:
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
+  packages/media-utils:
+    dependencies:
+      '@virtue/types':
+        specifier: workspace:*
+        version: link:../types
+      '@virtue/validation':
+        specifier: workspace:*
+        version: link:../validation
     devDependencies:
       '@types/node':
         specifier: ^20.0.0
@@ -141,6 +259,45 @@ importers:
         specifier: ^5.5.0
         version: 5.9.3
 
+  packages/review-engine:
+    dependencies:
+      '@virtue/types':
+        specifier: workspace:*
+        version: link:../types
+      '@virtue/validation':
+        specifier: workspace:*
+        version: link:../validation
+    devDependencies:
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
+  packages/routing-engine:
+    dependencies:
+      '@virtue/provider-sdk':
+        specifier: workspace:*
+        version: link:../provider-sdk
+      '@virtue/types':
+        specifier: workspace:*
+        version: link:../types
+      '@virtue/validation':
+        specifier: workspace:*
+        version: link:../validation
+    devDependencies:
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
+  packages/simulation-engine:
+    dependencies:
+      '@virtue/types':
+        specifier: workspace:*
+        version: link:../types
+    devDependencies:
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
   packages/skills-engine:
     dependencies:
       '@virtue/types':
@@ -159,6 +316,19 @@ importers:
       '@virtue/skills-engine':
         specifier: workspace:*
         version: link:../skills-engine
+      '@virtue/types':
+        specifier: workspace:*
+        version: link:../types
+      '@virtue/validation':
+        specifier: workspace:*
+        version: link:../validation
+    devDependencies:
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
+  packages/timeline-engine:
+    dependencies:
       '@virtue/types':
         specifier: workspace:*
         version: link:../types
@@ -949,6 +1119,40 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
+  turbo-darwin-64@2.8.14:
+    resolution: {integrity: sha512-9sFi7n2lLfEsGWi5OEoA/eTtQU2BPKtzSYKqufMtDeRmqMT9vKjbv9gJCRkllSVE9BOXA0qXC3diyX8V8rKIKw==}
+    cpu: [x64]
+    os: [darwin]
+
+  turbo-darwin-arm64@2.8.14:
+    resolution: {integrity: sha512-aS4yJuy6A1PCLws+PJpZP0qCURG8Y5iVx13z/WAbKyeDTY6W6PiGgcEllSaeLGxyn++382ztN/EZH85n2zZ6VQ==}
+    cpu: [arm64]
+    os: [darwin]
+
+  turbo-linux-64@2.8.14:
+    resolution: {integrity: sha512-XC6wPUDJkakjhNLaS0NrHDMiujRVjH+naEAwvKLArgqRaFkNxjmyNDRM4eu3soMMFmjym6NTxYaF74rvET+Orw==}
+    cpu: [x64]
+    os: [linux]
+
+  turbo-linux-arm64@2.8.14:
+    resolution: {integrity: sha512-ChfE7isyVNjZrVSPDwcfqcHLG/FuIBbOFxnt1FM8vSuBGzHAs8AlTdwFNIxlEMJfZ8Ad9mdMxdmsCUPIWiQ6cg==}
+    cpu: [arm64]
+    os: [linux]
+
+  turbo-windows-64@2.8.14:
+    resolution: {integrity: sha512-FTbIeQL1ycLFW2t9uQNMy+bRSzi3Xhwun/e7ZhFBdM+U0VZxxrtfYEBM9CHOejlfqomk6Jh7aRz0sJoqYn39Hg==}
+    cpu: [x64]
+    os: [win32]
+
+  turbo-windows-arm64@2.8.14:
+    resolution: {integrity: sha512-KgZX12cTyhY030qS7ieT8zRkhZZE2VWJasDFVUSVVn17nR7IShpv68/7j5UqJNeRLIGF1XPK0phsP5V5yw3how==}
+    cpu: [arm64]
+    os: [win32]
+
+  turbo@2.8.14:
+    resolution: {integrity: sha512-UCTxeMNYT1cKaHiIFdLCQ7ulI+jw5i5uOnJOrRXsgUD7G3+OjlUjwVd7JfeVt2McWSVGjYA3EVW/v1FSsJ5DtA==}
+    hasBin: true
+
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
@@ -1556,6 +1760,33 @@ snapshots:
       get-tsconfig: 4.13.6
     optionalDependencies:
       fsevents: 2.3.3
+
+  turbo-darwin-64@2.8.14:
+    optional: true
+
+  turbo-darwin-arm64@2.8.14:
+    optional: true
+
+  turbo-linux-64@2.8.14:
+    optional: true
+
+  turbo-linux-arm64@2.8.14:
+    optional: true
+
+  turbo-windows-64@2.8.14:
+    optional: true
+
+  turbo-windows-arm64@2.8.14:
+    optional: true
+
+  turbo@2.8.14:
+    optionalDependencies:
+      turbo-darwin-64: 2.8.14
+      turbo-darwin-arm64: 2.8.14
+      turbo-linux-64: 2.8.14
+      turbo-linux-arm64: 2.8.14
+      turbo-windows-64: 2.8.14
+      turbo-windows-arm64: 2.8.14
 
   typescript@5.9.3: {}
 

@@ -4,7 +4,53 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import type { VirtueProject, VirtueShot, VirtueScene } from "@virtue/types";
+import type {
+  VirtueProject,
+  VirtueShot,
+  VirtueScene,
+  VirtueRenderJob,
+  VirtueRoutingDecision,
+  VirtueComment,
+  VirtueApproval,
+  VirtueAlternateTake,
+  VirtueWorkflowStatus,
+} from "@virtue/types";
+
+interface ProviderInfo {
+  name: string;
+  displayName: string;
+  available: boolean;
+}
+
+const ROUTING_MODES = [
+  { value: "balanced", label: "Balanced", desc: "Optimize across quality, speed, and cost" },
+  { value: "auto_quality", label: "Quality", desc: "Maximize output quality" },
+  { value: "auto_speed", label: "Speed", desc: "Fastest turnaround" },
+  { value: "auto_cost", label: "Cost", desc: "Minimize generation cost" },
+  { value: "manual", label: "Manual", desc: "Choose provider yourself" },
+] as const;
+
+const APPROVAL_STATES = [
+  { value: "pending", label: "Pending", color: "text-zinc-500 bg-zinc-800/60 border-zinc-700/40" },
+  { value: "needs_changes", label: "Changes", color: "text-amber-400 bg-amber-950/30 border-amber-800/40" },
+  { value: "approved", label: "Approved", color: "text-emerald-400 bg-emerald-950/30 border-emerald-800/40" },
+  { value: "rejected", label: "Rejected", color: "text-red-400 bg-red-950/30 border-red-800/40" },
+] as const;
+
+const WORKFLOW_STAGES = [
+  "concept", "planning", "previz", "rendering", "review", "approved", "final_exported", "archived",
+] as const;
+
+const STAGE_COLORS: Record<string, string> = {
+  concept: "bg-zinc-700",
+  planning: "bg-blue-700",
+  previz: "bg-purple-700",
+  rendering: "bg-amber-600",
+  review: "bg-cyan-600",
+  approved: "bg-emerald-600",
+  final_exported: "bg-green-500",
+  archived: "bg-zinc-600",
+};
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -14,6 +60,26 @@ export default function ProjectDetailPage() {
     shot: VirtueShot;
   } | null>(null);
 
+  // Provider state
+  const [providers, setProviders] = useState<ProviderInfo[]>([]);
+  const [renderProvider, setRenderProvider] = useState("mock");
+  const [renderPrompt, setRenderPrompt] = useState("");
+  const [renderStatus, setRenderStatus] = useState<VirtueRenderJob | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Routing state
+  const [routingMode, setRoutingMode] = useState("balanced");
+  const [routingDecision, setRoutingDecision] = useState<VirtueRoutingDecision | null>(null);
+  const [loadingRouting, setLoadingRouting] = useState(false);
+
+  // Review state
+  const [comments, setComments] = useState<VirtueComment[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [shotApproval, setShotApproval] = useState<VirtueApproval | null>(null);
+  const [takes, setTakes] = useState<VirtueAlternateTake[]>([]);
+  const [projectWorkflow, setProjectWorkflow] = useState<VirtueWorkflowStatus | null>(null);
+  const [showComments, setShowComments] = useState(false);
+
   // Scene creation
   const [showAddScene, setShowAddScene] = useState(false);
   const [sceneTitle, setSceneTitle] = useState("");
@@ -21,9 +87,7 @@ export default function ProjectDetailPage() {
   const [sceneMood, setSceneMood] = useState("");
 
   // Shot creation
-  const [addingShotToScene, setAddingShotToScene] = useState<string | null>(
-    null
-  );
+  const [addingShotToScene, setAddingShotToScene] = useState<string | null>(null);
   const [shotDesc, setShotDesc] = useState("");
   const [shotPrompt, setShotPrompt] = useState("");
   const [shotType, setShotType] = useState("wide");
@@ -33,8 +97,70 @@ export default function ProjectDetailPage() {
   const [shotLighting, setShotLighting] = useState("natural");
 
   useEffect(() => {
-    if (id) api.getProject(id).then(setProject).catch(() => {});
+    if (id) {
+      api.getProject(id).then(setProject).catch(() => {});
+      api.getWorkflowStage("project", id).then(setProjectWorkflow).catch(() => {});
+    }
+    api.listProviders().then(setProviders).catch(() => {});
   }, [id]);
+
+  // Enriched prompt state
+  const [enrichedPrompt, setEnrichedPrompt] = useState<string>("");
+  const [continuityFragment, setContinuityFragment] = useState<string>("");
+
+  // When selecting a shot, fetch enriched prompt, routing, comments, approval, takes
+  useEffect(() => {
+    if (selectedShot && project) {
+      setRenderStatus(null);
+      setRoutingDecision(null);
+
+      api
+        .getEnrichedPrompt(project.id, selectedShot.scene.id, selectedShot.shot.id)
+        .then((result) => {
+          setRenderPrompt(result.enrichedPrompt);
+          setEnrichedPrompt(result.enrichedPrompt);
+          setContinuityFragment(result.continuityFragment);
+        })
+        .catch(() => {
+          setRenderPrompt(selectedShot.shot.prompt || selectedShot.shot.description);
+          setEnrichedPrompt("");
+          setContinuityFragment("");
+        });
+
+      fetchRoutingRecommendation(selectedShot.scene.id, selectedShot.shot.id);
+
+      // Fetch review data
+      api.listComments("shot", selectedShot.shot.id).then(setComments).catch(() => setComments([]));
+      api.getApproval("shot", selectedShot.shot.id).then(setShotApproval).catch(() => setShotApproval(null));
+      api.listTakes(selectedShot.shot.id).then(setTakes).catch(() => setTakes([]));
+    }
+  }, [selectedShot?.shot.id]);
+
+  // Re-fetch routing when mode changes
+  useEffect(() => {
+    if (selectedShot && project && routingMode !== "manual") {
+      fetchRoutingRecommendation(selectedShot.scene.id, selectedShot.shot.id);
+    }
+  }, [routingMode]);
+
+  async function fetchRoutingRecommendation(sceneId: string, shotId: string) {
+    if (!project || routingMode === "manual") return;
+    setLoadingRouting(true);
+    try {
+      const decision = await api.recommendProvider({
+        projectId: project.id,
+        sceneId,
+        shotId,
+        policy: routingMode,
+      });
+      setRoutingDecision(decision);
+      setRenderProvider(decision.selectedProvider);
+    } catch {
+      setRoutingDecision(null);
+    } finally {
+      setLoadingRouting(false);
+    }
+  }
 
   async function handleAddScene() {
     if (!sceneTitle.trim() || !project) return;
@@ -74,7 +200,103 @@ export default function ProjectDetailPage() {
 
   async function handleSubmitRender(sceneId: string, shotId: string) {
     if (!project) return;
-    await api.submitRender(project.id, sceneId, shotId);
+    setSubmitting(true);
+    try {
+      const isManual = routingMode === "manual";
+      const job = await api.submitRender(
+        project.id,
+        sceneId,
+        shotId,
+        isManual ? renderProvider : undefined,
+        renderPrompt || undefined,
+        isManual ? undefined : routingMode,
+      );
+      setRenderStatus(job);
+
+      // Auto-create alternate take
+      api.createTake(shotId, {
+        renderJobId: job.id,
+        provider: job.provider,
+        promptVersion: renderPrompt,
+        label: `Take ${takes.length + 1}`,
+      }).then((take) => setTakes((prev) => [...prev, take])).catch(() => {});
+
+      if (job.status !== "completed" && job.status !== "failed") {
+        pollRenderJob(job.id);
+      }
+    } catch (err) {
+      setRenderStatus({
+        id: "error",
+        projectId: project.id,
+        shotId,
+        provider: renderProvider as any,
+        status: "failed",
+        progress: 0,
+        prompt: renderPrompt,
+        skills: [],
+        error: err instanceof Error ? err.message : "Failed to submit",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function pollRenderJob(jobId: string) {
+    const interval = setInterval(async () => {
+      try {
+        const job = await api.getRender(jobId);
+        setRenderStatus(job);
+        if (job.status === "completed" || job.status === "failed") {
+          clearInterval(interval);
+        }
+      } catch {
+        clearInterval(interval);
+      }
+    }, 5000);
+  }
+
+  async function handleAddComment() {
+    if (!newComment.trim() || !selectedShot) return;
+    const comment = await api.addComment({
+      targetType: "shot",
+      targetId: selectedShot.shot.id,
+      body: newComment,
+      authorName: "Director",
+    });
+    setComments((prev) => [...prev, comment]);
+    setNewComment("");
+  }
+
+  async function handleResolveComment(commentId: string) {
+    const updated = await api.resolveComment(commentId);
+    setComments((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+  }
+
+  async function handleSetApproval(state: string) {
+    if (!selectedShot) return;
+    const approval = await api.setApproval({
+      targetType: "shot",
+      targetId: selectedShot.shot.id,
+      state,
+      reviewerName: "Director",
+    });
+    setShotApproval(approval);
+  }
+
+  async function handleSelectTake(takeId: string) {
+    if (!selectedShot) return;
+    const updated = await api.selectTake(selectedShot.shot.id, takeId);
+    setTakes((prev) => prev.map((t) =>
+      t.id === updated.id ? updated : t.shotId === updated.shotId && t.status === "selected" ? { ...t, status: "active" as const } : t
+    ));
+  }
+
+  async function handleAdvanceWorkflow() {
+    if (!project) return;
+    const status = await api.advanceWorkflow({ targetType: "project", targetId: project.id });
+    setProjectWorkflow(status);
   }
 
   if (!project) {
@@ -86,6 +308,9 @@ export default function ProjectDetailPage() {
   }
 
   const totalShots = project.scenes.reduce((n, s) => n + s.shots.length, 0);
+  const currentStageIdx = projectWorkflow
+    ? WORKFLOW_STAGES.indexOf(projectWorkflow.stage as any)
+    : 0;
 
   return (
     <div className="flex h-full">
@@ -109,16 +334,40 @@ export default function ProjectDetailPage() {
               </p>
             )}
           </div>
-          <span className="rounded bg-zinc-800 px-2 py-1 text-[10px] text-zinc-500 font-mono uppercase">
-            {project.provider}
-          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleAdvanceWorkflow}
+              className={`rounded px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider text-white/80 hover:text-white transition-colors ${STAGE_COLORS[projectWorkflow?.stage || "concept"]}`}
+              title="Click to advance workflow stage"
+            >
+              {projectWorkflow?.stage || "concept"}
+            </button>
+            <span className="rounded bg-zinc-800 px-2 py-1 text-[10px] text-zinc-500 font-mono uppercase">
+              {project.provider}
+            </span>
+          </div>
+        </div>
+
+        {/* Workflow Progress Bar */}
+        <div className="flex gap-0.5 rounded-lg overflow-hidden">
+          {WORKFLOW_STAGES.map((stage, i) => (
+            <div
+              key={stage}
+              className={`h-1.5 flex-1 transition-colors ${
+                i <= currentStageIdx ? STAGE_COLORS[stage] : "bg-zinc-800/60"
+              }`}
+              title={stage}
+            />
+          ))}
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-5 gap-3">
           <MiniStat label="Scenes" value={project.scenes.length} />
           <MiniStat label="Shots" value={totalShots} />
-          <MiniStat label="Characters" value={project.characters.length} />
+          <MiniStat label="Characters" value={project.characters?.length ?? 0} />
+          <MiniStat label="Environments" value={project.environments?.length ?? 0} />
+          <MiniStat label="Props" value={project.props?.length ?? 0} />
         </div>
 
         {/* Scenes */}
@@ -199,7 +448,7 @@ export default function ProjectDetailPage() {
                       <p className="text-sm font-medium text-zinc-200">
                         {scene.title}
                       </p>
-                      <div className="flex gap-3 mt-0.5">
+                      <div className="flex gap-3 mt-0.5 flex-wrap">
                         {scene.location && (
                           <span className="text-[10px] text-zinc-600">
                             {scene.location}
@@ -210,8 +459,35 @@ export default function ProjectDetailPage() {
                             {scene.mood}
                           </span>
                         )}
+                        {scene.context?.environmentId && (
+                          <span className="text-[10px] text-emerald-600">
+                            env: {project.environments?.find(e => e.id === scene.context?.environmentId)?.name ?? "?"}
+                          </span>
+                        )}
+                        {(scene.context?.activeCharacterIds?.length ?? 0) > 0 && (
+                          <span className="text-[10px] text-blue-600">
+                            {scene.context!.activeCharacterIds.length} char{scene.context!.activeCharacterIds.length !== 1 ? "s" : ""}
+                          </span>
+                        )}
+                        {(scene.context?.activePropIds?.length ?? 0) > 0 && (
+                          <span className="text-[10px] text-amber-600">
+                            {scene.context!.activePropIds.length} prop{scene.context!.activePropIds.length !== 1 ? "s" : ""}
+                          </span>
+                        )}
                       </div>
                     </div>
+                    <Link
+                      href={`/projects/${project.id}/scenes/${scene.id}/editor`}
+                      className="text-[10px] text-zinc-600 hover:text-purple-400 transition-colors uppercase tracking-wider"
+                    >
+                      Editor
+                    </Link>
+                    <Link
+                      href={`/projects/${project.id}/scenes/${scene.id}/timeline`}
+                      className="text-[10px] text-zinc-600 hover:text-emerald-400 transition-colors uppercase tracking-wider"
+                    >
+                      Timeline
+                    </Link>
                     <button
                       onClick={() =>
                         setAddingShotToScene(
@@ -256,9 +532,7 @@ export default function ProjectDetailPage() {
                       </div>
                       <div className="grid grid-cols-5 gap-2">
                         <div>
-                          <label className="block text-[10px] text-zinc-600 mb-1">
-                            Shot Type
-                          </label>
+                          <label className="block text-[10px] text-zinc-600 mb-1">Shot Type</label>
                           <select
                             value={shotType}
                             onChange={(e) => setShotType(e.target.value)}
@@ -275,64 +549,25 @@ export default function ProjectDetailPage() {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-[10px] text-zinc-600 mb-1">
-                            Duration
-                          </label>
-                          <input
-                            type="text"
-                            value={shotDuration}
-                            onChange={(e) => setShotDuration(e.target.value)}
-                            className="w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-300 focus:outline-none"
-                          />
+                          <label className="block text-[10px] text-zinc-600 mb-1">Duration</label>
+                          <input type="text" value={shotDuration} onChange={(e) => setShotDuration(e.target.value)} className="w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-300 focus:outline-none" />
                         </div>
                         <div>
-                          <label className="block text-[10px] text-zinc-600 mb-1">
-                            Camera
-                          </label>
-                          <input
-                            type="text"
-                            value={shotCamera}
-                            onChange={(e) => setShotCamera(e.target.value)}
-                            className="w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-300 focus:outline-none"
-                          />
+                          <label className="block text-[10px] text-zinc-600 mb-1">Camera</label>
+                          <input type="text" value={shotCamera} onChange={(e) => setShotCamera(e.target.value)} className="w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-300 focus:outline-none" />
                         </div>
                         <div>
-                          <label className="block text-[10px] text-zinc-600 mb-1">
-                            Lens
-                          </label>
-                          <input
-                            type="text"
-                            value={shotLens}
-                            onChange={(e) => setShotLens(e.target.value)}
-                            className="w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-300 focus:outline-none"
-                          />
+                          <label className="block text-[10px] text-zinc-600 mb-1">Lens</label>
+                          <input type="text" value={shotLens} onChange={(e) => setShotLens(e.target.value)} className="w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-300 focus:outline-none" />
                         </div>
                         <div>
-                          <label className="block text-[10px] text-zinc-600 mb-1">
-                            Lighting
-                          </label>
-                          <input
-                            type="text"
-                            value={shotLighting}
-                            onChange={(e) => setShotLighting(e.target.value)}
-                            className="w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-300 focus:outline-none"
-                          />
+                          <label className="block text-[10px] text-zinc-600 mb-1">Lighting</label>
+                          <input type="text" value={shotLighting} onChange={(e) => setShotLighting(e.target.value)} className="w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-300 focus:outline-none" />
                         </div>
                       </div>
                       <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => setAddingShotToScene(null)}
-                          className="text-xs text-zinc-500 hover:text-zinc-300 px-2 py-1"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={() => handleAddShot(scene.id)}
-                          disabled={!shotDesc.trim()}
-                          className="rounded bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-900 hover:bg-white disabled:opacity-40 transition-colors"
-                        >
-                          Add Shot
-                        </button>
+                        <button onClick={() => setAddingShotToScene(null)} className="text-xs text-zinc-500 hover:text-zinc-300 px-2 py-1">Cancel</button>
+                        <button onClick={() => handleAddShot(scene.id)} disabled={!shotDesc.trim()} className="rounded bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-900 hover:bg-white disabled:opacity-40 transition-colors">Add Shot</button>
                       </div>
                     </div>
                   )}
@@ -346,14 +581,10 @@ export default function ProjectDetailPage() {
                           <button
                             key={shot.id}
                             onClick={() =>
-                              setSelectedShot(
-                                isSelected ? null : { scene, shot }
-                              )
+                              setSelectedShot(isSelected ? null : { scene, shot })
                             }
                             className={`w-full text-left flex items-center gap-3 px-4 py-2.5 transition-colors ${
-                              isSelected
-                                ? "bg-zinc-800/50"
-                                : "hover:bg-zinc-900/50"
+                              isSelected ? "bg-zinc-800/50" : "hover:bg-zinc-900/50"
                             }`}
                           >
                             <span className="text-[10px] text-zinc-700 font-mono w-6 shrink-0">
@@ -387,15 +618,155 @@ export default function ProjectDetailPage() {
             <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
               Shot Detail
             </h2>
-            <button
-              onClick={() => setSelectedShot(null)}
-              className="text-zinc-600 hover:text-zinc-300 text-xs transition-colors"
-            >
-              Close
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowComments(!showComments)}
+                className={`text-[10px] uppercase tracking-wider transition-colors ${
+                  showComments ? "text-cyan-400" : "text-zinc-600 hover:text-zinc-300"
+                }`}
+              >
+                Comments{comments.length > 0 ? ` (${comments.length})` : ""}
+              </button>
+              <button
+                onClick={() => setSelectedShot(null)}
+                className="text-zinc-600 hover:text-zinc-300 text-xs transition-colors"
+              >
+                Close
+              </button>
+            </div>
           </div>
 
           <div className="p-5 space-y-5">
+            {/* Approval Badge */}
+            <div>
+              <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                Approval Status
+              </label>
+              <div className="flex gap-1">
+                {APPROVAL_STATES.map((as) => (
+                  <button
+                    key={as.value}
+                    onClick={() => handleSetApproval(as.value)}
+                    className={`flex-1 rounded-md py-1.5 text-[9px] uppercase tracking-wider font-medium border transition-all ${
+                      (shotApproval?.state || "pending") === as.value
+                        ? as.color
+                        : "bg-zinc-900/40 border-zinc-800/60 text-zinc-600 hover:border-zinc-600"
+                    }`}
+                  >
+                    {as.label}
+                  </button>
+                ))}
+              </div>
+              {shotApproval?.notes && (
+                <p className="text-[10px] text-zinc-500 mt-1 italic">{shotApproval.notes}</p>
+              )}
+            </div>
+
+            {/* Render Result Video */}
+            {renderStatus?.output?.url && renderStatus.status === "completed" && (
+              <div>
+                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                  Render Result
+                </label>
+                <div className="rounded-lg overflow-hidden border border-zinc-800/60 bg-black">
+                  <video
+                    src={renderStatus.output.url}
+                    controls autoPlay loop muted playsInline
+                    className="w-full aspect-video"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Render Status */}
+            {renderStatus && (
+              <div>
+                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                  Render Status
+                </label>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`h-2 w-2 rounded-full shrink-0 ${
+                    renderStatus.status === "completed" ? "bg-emerald-500"
+                    : renderStatus.status === "failed" ? "bg-red-400"
+                    : "bg-blue-400 animate-pulse"
+                  }`} />
+                  <span className={`text-xs font-medium uppercase ${
+                    renderStatus.status === "completed" ? "text-emerald-400"
+                    : renderStatus.status === "failed" ? "text-red-400"
+                    : "text-blue-400"
+                  }`}>
+                    {renderStatus.status}
+                  </span>
+                  <span className="text-xs text-zinc-600 ml-auto tabular-nums">
+                    {renderStatus.progress}%
+                  </span>
+                </div>
+                <div className="h-1.5 rounded-full bg-zinc-800">
+                  <div
+                    className={`h-1.5 rounded-full transition-all duration-500 ${
+                      renderStatus.status === "completed" ? "bg-emerald-500"
+                      : renderStatus.status === "failed" ? "bg-red-500"
+                      : "bg-blue-500"
+                    }`}
+                    style={{ width: `${renderStatus.progress}%` }}
+                  />
+                </div>
+                {renderStatus.error && (
+                  <p className="text-xs text-red-400 mt-1.5">{renderStatus.error}</p>
+                )}
+              </div>
+            )}
+
+            {/* Alternate Takes */}
+            {takes.length > 0 && (
+              <div>
+                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                  Takes ({takes.length})
+                </label>
+                <div className="space-y-1">
+                  {takes.filter((t) => t.status !== "archived").map((take) => (
+                    <button
+                      key={take.id}
+                      onClick={() => handleSelectTake(take.id)}
+                      className={`w-full flex items-center gap-2 rounded px-2.5 py-1.5 text-left transition-all border ${
+                        take.status === "selected"
+                          ? "bg-emerald-950/20 border-emerald-900/30"
+                          : take.status === "favorite"
+                            ? "bg-amber-950/20 border-amber-900/30"
+                            : "bg-zinc-900/30 border-zinc-800/40 hover:border-zinc-700"
+                      }`}
+                    >
+                      <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${
+                        take.status === "selected" ? "bg-emerald-400"
+                        : take.status === "favorite" ? "bg-amber-400"
+                        : "bg-zinc-500"
+                      }`} />
+                      <span className="text-[10px] text-zinc-300 flex-1">
+                        {take.label || take.id.slice(0, 12)}
+                      </span>
+                      <span className="text-[9px] text-zinc-600 font-mono uppercase">
+                        {take.provider}
+                      </span>
+                      {take.status === "selected" && (
+                        <span className="text-[8px] text-emerald-500 uppercase">active</span>
+                      )}
+                      {take.status === "favorite" && (
+                        <span className="text-[8px] text-amber-500 uppercase">fav</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                {takes.length >= 2 && (
+                  <Link
+                    href={`/studio/compare/new?renders=${takes.map((t) => t.renderJobId).join(",")}`}
+                    className="block mt-2 text-center text-[10px] text-cyan-500 hover:text-cyan-400 uppercase tracking-wider transition-colors"
+                  >
+                    Compare Takes
+                  </Link>
+                )}
+              </div>
+            )}
+
             {/* Description */}
             <div>
               <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
@@ -406,38 +777,162 @@ export default function ProjectDetailPage() {
               </p>
             </div>
 
-            {/* Prompt */}
-            {selectedShot.shot.prompt && (
+            {/* Editable Prompt */}
+            <div>
+              <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                Generation Prompt
+              </label>
+              <textarea
+                value={renderPrompt}
+                onChange={(e) => setRenderPrompt(e.target.value)}
+                rows={4}
+                className="w-full rounded-md border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-xs text-zinc-300 placeholder-zinc-600 focus:border-zinc-600 focus:outline-none resize-none leading-relaxed"
+                placeholder="Enter generation prompt..."
+              />
+            </div>
+
+            {/* Continuity Context */}
+            {continuityFragment && (
               <div>
                 <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
-                  Generation Prompt
+                  Continuity Context
                 </label>
-                <p className="text-xs text-zinc-400 leading-relaxed bg-zinc-900/60 rounded-md p-3 border border-zinc-800/40">
-                  {selectedShot.shot.prompt}
-                </p>
+                <div className="bg-emerald-950/20 border border-emerald-900/30 rounded-md p-3">
+                  <p className="text-[11px] text-emerald-400/80 leading-relaxed font-mono">
+                    {continuityFragment}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* ── Routing Intelligence ──────────────────── */}
+            <div>
+              <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                Routing Mode
+              </label>
+              <div className="grid grid-cols-5 gap-1">
+                {ROUTING_MODES.map((mode) => (
+                  <button
+                    key={mode.value}
+                    onClick={() => setRoutingMode(mode.value)}
+                    className={`rounded-md py-1.5 text-[9px] uppercase tracking-wider font-medium border transition-all ${
+                      routingMode === mode.value
+                        ? "bg-cyan-900/40 border-cyan-700/60 text-cyan-400"
+                        : "bg-zinc-900/40 border-zinc-800/60 text-zinc-600 hover:border-zinc-600 hover:text-zinc-400"
+                    }`}
+                    title={mode.desc}
+                  >
+                    {mode.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Routing Recommendation */}
+            {routingMode !== "manual" && (
+              <div>
+                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                  Provider Recommendation
+                </label>
+                {loadingRouting ? (
+                  <div className="bg-zinc-900/60 rounded-md p-3 border border-zinc-800/40">
+                    <p className="text-[10px] text-zinc-500 animate-pulse">Analyzing shot requirements...</p>
+                  </div>
+                ) : routingDecision ? (
+                  <div className="space-y-2">
+                    <div className="bg-cyan-950/20 border border-cyan-900/30 rounded-md p-3">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="h-2 w-2 rounded-full bg-cyan-400 shrink-0" />
+                        <span className="text-xs font-semibold text-cyan-300">
+                          {routingDecision.scores.find(s => s.provider === routingDecision.selectedProvider)?.displayName || routingDecision.selectedProvider}
+                        </span>
+                        <span className="ml-auto rounded bg-cyan-900/40 px-1.5 py-0.5 text-[8px] text-cyan-500 font-mono uppercase">
+                          Recommended
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-cyan-400/70 leading-relaxed">
+                        {routingDecision.rationale}
+                      </p>
+                    </div>
+
+                    <div className="space-y-1">
+                      {routingDecision.scores.map((score) => (
+                        <button
+                          key={score.provider}
+                          onClick={() => {
+                            setRenderProvider(score.provider);
+                            setRoutingMode("manual");
+                          }}
+                          disabled={!score.available}
+                          className={`w-full flex items-center gap-2 rounded px-2.5 py-1.5 text-left transition-all border ${
+                            score.provider === routingDecision.selectedProvider
+                              ? "bg-cyan-950/20 border-cyan-900/30"
+                              : score.available
+                                ? "bg-zinc-900/30 border-zinc-800/40 hover:border-zinc-700"
+                                : "bg-zinc-900/20 border-zinc-800/30 opacity-50"
+                          }`}
+                        >
+                          <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${
+                            score.provider === routingDecision.selectedProvider ? "bg-cyan-400"
+                            : score.available ? "bg-zinc-500" : "bg-zinc-700"
+                          }`} />
+                          <span className="text-[10px] text-zinc-300 flex-1">
+                            {score.displayName}
+                          </span>
+                          <span className="text-[9px] text-zinc-500 font-mono tabular-nums">
+                            {(score.totalScore * 100).toFixed(0)}
+                          </span>
+                          {!score.available && (
+                            <span className="text-[8px] text-zinc-700">unavailable</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            )}
+
+            {/* Manual Provider Picker (only in manual mode) */}
+            {routingMode === "manual" && (
+              <div>
+                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                  Provider
+                </label>
+                <div className="flex gap-2">
+                  {providers.map((p) => (
+                    <button
+                      key={p.name}
+                      onClick={() => setRenderProvider(p.name)}
+                      disabled={!p.available}
+                      className={`flex-1 rounded-md px-3 py-2 text-xs font-medium transition-colors border ${
+                        renderProvider === p.name
+                          ? "border-zinc-500 bg-zinc-800 text-zinc-200"
+                          : p.available
+                            ? "border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700"
+                            : "border-zinc-800/50 text-zinc-700 cursor-not-allowed"
+                      }`}
+                    >
+                      {p.displayName}
+                      {!p.available && (
+                        <span className="block text-[9px] text-zinc-700 mt-0.5">No API key</span>
+                      )}
+                    </button>
+                  ))}
+                  {providers.length === 0 && (
+                    <span className="text-xs text-zinc-600">Loading providers...</span>
+                  )}
+                </div>
               </div>
             )}
 
             {/* Parameters Grid */}
             <div className="grid grid-cols-2 gap-3">
-              <ParamField
-                label="Shot Type"
-                value={selectedShot.shot.shotType}
-              />
-              <ParamField
-                label="Duration"
-                value={`${selectedShot.shot.durationSec}s`}
-              />
-              <ParamField
-                label="Camera"
-                value={selectedShot.shot.cameraMove}
-              />
+              <ParamField label="Shot Type" value={selectedShot.shot.shotType} />
+              <ParamField label="Duration" value={`${selectedShot.shot.durationSec}s`} />
+              <ParamField label="Camera" value={selectedShot.shot.cameraMove} />
               <ParamField label="Lens" value={selectedShot.shot.lens} />
-              <ParamField
-                label="Lighting"
-                value={selectedShot.shot.lighting}
-                span2
-              />
+              <ParamField label="Lighting" value={selectedShot.shot.lighting} span2 />
             </div>
 
             {/* Scene Context */}
@@ -479,15 +974,81 @@ export default function ProjectDetailPage() {
             {/* Submit Render */}
             <button
               onClick={() =>
-                handleSubmitRender(
-                  selectedShot.scene.id,
-                  selectedShot.shot.id
-                )
+                handleSubmitRender(selectedShot.scene.id, selectedShot.shot.id)
               }
-              className="w-full rounded-md bg-zinc-100 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-white"
+              disabled={submitting || !renderPrompt.trim()}
+              className="w-full rounded-md bg-zinc-100 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-white disabled:opacity-40"
             >
-              Submit Render
+              {submitting
+                ? "Submitting..."
+                : routingMode === "manual"
+                  ? `Render with ${renderProvider}`
+                  : `Render (${routingMode.replace("auto_", "").replace("_", " ")})`}
             </button>
+
+            {/* Comments Panel */}
+            {showComments && (
+              <div>
+                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                  Comments
+                </label>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {comments.length === 0 ? (
+                    <p className="text-[10px] text-zinc-600 italic">No comments yet.</p>
+                  ) : (
+                    comments.map((comment) => (
+                      <div
+                        key={comment.id}
+                        className={`rounded-md p-2.5 border ${
+                          comment.resolvedAt
+                            ? "bg-zinc-900/20 border-zinc-800/30 opacity-60"
+                            : "bg-zinc-900/40 border-zinc-800/50"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[10px] text-zinc-400 font-medium">
+                            {comment.authorName}
+                          </span>
+                          <span className="text-[9px] text-zinc-700">
+                            {new Date(comment.createdAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                          </span>
+                          {comment.resolvedAt ? (
+                            <span className="ml-auto text-[8px] text-emerald-600 uppercase">Resolved</span>
+                          ) : (
+                            <button
+                              onClick={() => handleResolveComment(comment.id)}
+                              className="ml-auto text-[8px] text-zinc-600 hover:text-emerald-400 uppercase transition-colors"
+                            >
+                              Resolve
+                            </button>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-zinc-300 leading-relaxed">
+                          {comment.body}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <div className="flex gap-2 mt-2">
+                  <input
+                    type="text"
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
+                    placeholder="Add a comment..."
+                    className="flex-1 rounded border border-zinc-800 bg-zinc-900 px-2.5 py-1.5 text-xs text-zinc-200 placeholder-zinc-600 focus:border-zinc-600 focus:outline-none"
+                  />
+                  <button
+                    onClick={handleAddComment}
+                    disabled={!newComment.trim()}
+                    className="rounded bg-zinc-700 px-3 py-1.5 text-xs text-zinc-200 hover:bg-zinc-600 disabled:opacity-40 transition-colors"
+                  >
+                    Post
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

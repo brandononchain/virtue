@@ -1,0 +1,15 @@
+{
+  "name": "Product Commercial",
+  "description": "Clean product showcase — speed and cost efficiency matter for iteration.",
+  "shot": {
+    "shotType": "insert",
+    "description": "A sleek smartphone rotates slowly on a white surface. Reflections gleam on its glass back.",
+    "prompt": "Product shot of a modern smartphone rotating on a white surface, clean studio lighting, reflections, commercial quality, minimal background",
+    "durationSec": 3,
+    "cameraMove": "orbit",
+    "characterIds": []
+  },
+  "policy": "auto_speed",
+  "expectedTraits": ["photoreal"],
+  "notes": "Short, simple shot — speed policy should favor fast turnaround providers (google, mock)."
+}

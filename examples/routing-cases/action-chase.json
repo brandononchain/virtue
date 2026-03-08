@@ -1,0 +1,14 @@
+{
+  "name": "Action Chase Sequence",
+  "description": "High-energy chase through city streets — motion quality and dynamic camera are critical.",
+  "shot": {
+    "shotType": "tracking",
+    "description": "A figure sprints through a rain-soaked alley, vaulting over crates. Camera follows in a handheld tracking shot.",
+    "prompt": "Tracking shot of a man running through a dark rainy alley, jumping over obstacles, handheld camera shake, cinematic motion blur, action movie style",
+    "durationSec": 8,
+    "cameraMove": "tracking",
+    "characterIds": ["runner"]
+  },
+  "expectedTraits": ["high-action", "wide cinematic"],
+  "notes": "Should favor providers with strong motion quality and camera control (google, luma). Long duration matters."
+}

@@ -1,0 +1,14 @@
+{
+  "name": "Dialogue Close-Up",
+  "description": "Two characters in tight dialogue — character consistency and lip sync matter most.",
+  "shot": {
+    "shotType": "close-up",
+    "description": "Elena and Marcus face each other across a candlelit table. Elena leans forward, speaking softly.",
+    "prompt": "Cinematic close-up of a woman leaning toward a man across a candlelit dinner table, warm amber lighting, shallow depth of field, 85mm lens, photorealistic",
+    "durationSec": 6,
+    "cameraMove": "slow_push",
+    "characterIds": ["elena", "marcus"]
+  },
+  "expectedTraits": ["dialogue close-up", "continuity-critical", "photoreal", "character-heavy"],
+  "notes": "Should favor providers with strong character consistency and photorealism (openai, luma)."
+}

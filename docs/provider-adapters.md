@@ -30,8 +30,14 @@ Simulates the full generation pipeline with staged progress:
 
 Each call to `poll()` advances the job by one stage.
 
-### Luma Dream Machine (Stub)
-Adapter for Luma's video generation API. Requires `LUMA_API_KEY`.
+### Luma Dream Machine (Implemented)
+Full integration with the Luma AI Dream Machine API. Set `LUMA_API_KEY` to enable.
+
+- Submits text-to-video generation requests
+- Maps Luma states (`queued`, `dreaming`, `completed`, `failed`) to Virtue statuses
+- Auto-polls until completion
+- Returns the video download URL on completion
+- Set `DEFAULT_PROVIDER=luma` in `.env` to use Luma by default
 
 ### OpenAI Sora (Stub)
 Adapter for OpenAI's video generation. Requires `OPENAI_API_KEY`.

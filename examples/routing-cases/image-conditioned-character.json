@@ -1,0 +1,19 @@
+{
+  "name": "Image-Conditioned Character Shot",
+  "description": "Character must match a provided reference image — image conditioning is mandatory.",
+  "shot": {
+    "shotType": "medium",
+    "description": "A woman in a red coat walks through a snowy park. She must match the provided character reference exactly.",
+    "prompt": "Medium shot of a woman in a red coat walking through a snowy park, matching reference image, consistent appearance, cinematic depth of field, winter atmosphere",
+    "durationSec": 5,
+    "cameraMove": "dolly",
+    "characterIds": ["woman_red_coat"]
+  },
+  "sceneContext": {
+    "hasReferenceAssets": true,
+    "characterCount": 1,
+    "hasEnvironment": true
+  },
+  "expectedTraits": ["image-conditioned", "photoreal", "continuity-critical"],
+  "notes": "Image conditioning is critical. Should favor providers that support image-to-video (luma, google)."
+}

@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join, basename } from "node:path";
 import type { VirtueSkill } from "@virtue/types";
-import { parseSkillMarkdown } from "./parser";
+import { parseSkillMarkdown } from "./parser.js";
 
 /**
  * Load all markdown skill files from a directory.

@@ -3,6 +3,14 @@ import { cors } from "hono/cors";
 import { projectRoutes } from "./routes/projects";
 import { skillRoutes } from "./routes/skills";
 import { renderRoutes } from "./routes/renders";
+import { sceneRoutes } from "./routes/scenes";
+import { directorRoutes } from "./routes/director";
+import { continuityRoutes } from "./routes/continuity";
+import { editorRoutes } from "./routes/editor";
+import { routingRoutes } from "./routes/routing";
+import { reviewRoutes } from "./routes/review";
+import { autonomousRoutes } from "./routes/autonomous";
+import { simulationRoutes } from "./routes/simulation";
 import { store } from "./services/store";
 
 export const app = new Hono();
@@ -42,3 +50,11 @@ app.get("/api/stats", (c) => {
 app.route("/api/projects", projectRoutes);
 app.route("/api/skills", skillRoutes);
 app.route("/api/renders", renderRoutes);
+app.route("/api/scenes", sceneRoutes);
+app.route("/api/director", directorRoutes);
+app.route("/api/continuity", continuityRoutes);
+app.route("/api/editor", editorRoutes);
+app.route("/api/routing", routingRoutes);
+app.route("/api/review", reviewRoutes);
+app.route("/api/autonomous", autonomousRoutes);
+app.route("/api/simulation", simulationRoutes);

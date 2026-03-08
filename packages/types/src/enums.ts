@@ -36,3 +36,148 @@ export const AssetType = {
   THUMBNAIL: "thumbnail",
 } as const;
 export type AssetType = (typeof AssetType)[keyof typeof AssetType];
+
+export const TransitionType = {
+  CUT: "cut",
+  DISSOLVE: "dissolve",
+  FADE_BLACK: "fade-black",
+  FADE_WHITE: "fade-white",
+} as const;
+export type TransitionType = (typeof TransitionType)[keyof typeof TransitionType];
+
+export const SceneRenderStatus = {
+  QUEUED: "queued",
+  PLANNING: "planning",
+  COMPOSING: "composing",
+  ENCODING: "encoding",
+  COMPLETED: "completed",
+  FAILED: "failed",
+} as const;
+export type SceneRenderStatus = (typeof SceneRenderStatus)[keyof typeof SceneRenderStatus];
+
+export const DirectorInputMode = {
+  SCREENPLAY: "screenplay",
+  CONCEPT: "concept",
+} as const;
+export type DirectorInputMode = (typeof DirectorInputMode)[keyof typeof DirectorInputMode];
+
+export const EditorTransitionType = {
+  CUT: "cut",
+  FADE: "fade",
+  CROSS_DISSOLVE: "cross-dissolve",
+} as const;
+export type EditorTransitionType = (typeof EditorTransitionType)[keyof typeof EditorTransitionType];
+
+export const AudioTrackType = {
+  MUSIC: "music",
+  VOICEOVER: "voiceover",
+  SFX: "sfx",
+} as const;
+export type AudioTrackType = (typeof AudioTrackType)[keyof typeof AudioTrackType];
+
+export const ExportJobStatus = {
+  QUEUED: "queued",
+  PLANNING: "planning",
+  COMPOSING_VIDEO: "composing_video",
+  MIXING_AUDIO: "mixing_audio",
+  ENCODING: "encoding",
+  COMPLETED: "completed",
+  FAILED: "failed",
+} as const;
+export type ExportJobStatus = (typeof ExportJobStatus)[keyof typeof ExportJobStatus];
+
+export const PacingPreset = {
+  CINEMATIC: "cinematic",
+  SLOW_BURN: "slow-burn",
+  FAST_CUT: "fast-cut",
+  TRAILER: "trailer",
+} as const;
+export type PacingPreset = (typeof PacingPreset)[keyof typeof PacingPreset];
+
+export const RoutingMode = {
+  AUTO_QUALITY: "auto_quality",
+  AUTO_SPEED: "auto_speed",
+  AUTO_COST: "auto_cost",
+  BALANCED: "balanced",
+  MANUAL: "manual",
+} as const;
+export type RoutingMode = (typeof RoutingMode)[keyof typeof RoutingMode];
+
+export const QualityTier = {
+  LOW: "low",
+  MEDIUM: "medium",
+  HIGH: "high",
+  PREMIUM: "premium",
+} as const;
+export type QualityTier = (typeof QualityTier)[keyof typeof QualityTier];
+
+export const SpeedTier = {
+  SLOW: "slow",
+  MEDIUM: "medium",
+  FAST: "fast",
+} as const;
+export type SpeedTier = (typeof SpeedTier)[keyof typeof SpeedTier];
+
+export const CostTier = {
+  FREE: "free",
+  LOW: "low",
+  MEDIUM: "medium",
+  HIGH: "high",
+} as const;
+export type CostTier = (typeof CostTier)[keyof typeof CostTier];
+
+export const ApprovalState = {
+  PENDING: "pending",
+  NEEDS_CHANGES: "needs_changes",
+  APPROVED: "approved",
+  REJECTED: "rejected",
+} as const;
+export type ApprovalState = (typeof ApprovalState)[keyof typeof ApprovalState];
+
+export const WorkflowStage = {
+  CONCEPT: "concept",
+  PLANNING: "planning",
+  PREVIZ: "previz",
+  RENDERING: "rendering",
+  REVIEW: "review",
+  APPROVED: "approved",
+  FINAL_EXPORTED: "final_exported",
+  ARCHIVED: "archived",
+} as const;
+export type WorkflowStage = (typeof WorkflowStage)[keyof typeof WorkflowStage];
+
+export const ReviewTargetType = {
+  PROJECT: "project",
+  SCENE: "scene",
+  SHOT: "shot",
+  RENDER: "render",
+  TIMELINE: "timeline",
+  EXPORT: "export",
+} as const;
+export type ReviewTargetType = (typeof ReviewTargetType)[keyof typeof ReviewTargetType];
+
+export const TakeStatus = {
+  ACTIVE: "active",
+  SELECTED: "selected",
+  FAVORITE: "favorite",
+  ARCHIVED: "archived",
+} as const;
+export type TakeStatus = (typeof TakeStatus)[keyof typeof TakeStatus];
+
+export const SuggestionType = {
+  ADD_SHOT: "add_shot",
+  TRIM_SHOT: "trim_shot",
+  REORDER: "reorder",
+  ADD_TRANSITION: "add_transition",
+  PROMPT_IMPROVEMENT: "prompt_improvement",
+  RETRY_RENDER: "retry_render",
+  PACING_ADJUSTMENT: "pacing_adjustment",
+} as const;
+export type SuggestionType = (typeof SuggestionType)[keyof typeof SuggestionType];
+
+export const SuggestionPriority = {
+  LOW: "low",
+  MEDIUM: "medium",
+  HIGH: "high",
+} as const;
+export type SuggestionPriority = (typeof SuggestionPriority)[keyof typeof SuggestionPriority];
