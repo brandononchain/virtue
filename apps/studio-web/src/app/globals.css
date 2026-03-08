@@ -11,6 +11,8 @@
 
   body {
     @apply bg-[#0a0a0a] text-zinc-200 antialiased;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
   }
 
   * {
@@ -22,4 +24,62 @@
   .studio-panel {
     @apply rounded-lg border border-zinc-800 bg-zinc-950/80 backdrop-blur;
   }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .touch-target {
+    @apply min-h-[48px] min-w-[48px];
+  }
+}
+
+/* Animations for bottom sheet */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+/* Mobile typography scale */
+@media (max-width: 640px) {
+  .mobile-title {
+    font-size: 22px;
+    line-height: 28px;
+  }
+
+  .mobile-body {
+    font-size: 16px;
+    line-height: 24px;
+  }
+}
+
+/* Hide scrollbar on mobile for horizontal scrolling areas */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
