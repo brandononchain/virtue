@@ -3,6 +3,7 @@ import { store } from "../services/store.js";
 import { orchestrator, registry } from "../services/orchestrator.js";
 import type { ProviderName } from "@virtue/types";
 import { resolveContinuityContext, applyContinuityToPrompt } from "@virtue/continuity-engine";
+import { recommendProvider, ROUTING_POLICIES } from "@virtue/routing-engine";
 
 export const renderRoutes = new Hono();
 
@@ -34,12 +35,13 @@ renderRoutes.get("/:id", (c) => {
 
 // Submit render job for a shot
 renderRoutes.post("/", async (c) => {
-  const { projectId, sceneId, shotId, provider, prompt } = await c.req.json<{
+  const { projectId, sceneId, shotId, provider, prompt, routingMode } = await c.req.json<{
     projectId: string;
     sceneId: string;
     shotId: string;
     provider?: ProviderName;
     prompt?: string;
+    routingMode?: string;
   }>();
 
   const project = store.getProject(projectId);
@@ -51,8 +53,39 @@ renderRoutes.post("/", async (c) => {
   const shot = scene.shots.find((s) => s.id === shotId);
   if (!shot) return c.json({ error: "Shot not found" }, 404);
 
-  if (provider && !registry.has(provider)) {
-    return c.json({ error: `Provider "${provider}" is not available` }, 400);
+  // Determine provider — routing or manual
+  let selectedProvider = provider;
+  let routingDecision;
+
+  if (!provider && routingMode && routingMode !== "manual") {
+    // Use routing engine to select provider
+    const policy = ROUTING_POLICIES[routingMode] || ROUTING_POLICIES.balanced;
+
+    const available = registry.list();
+    const availableNames = await Promise.all(
+      available.map(async (p) => ({
+        name: p.name,
+        isAvailable: await p.isAvailable(),
+      })),
+    );
+    const availableProviders = availableNames
+      .filter((p) => p.isAvailable)
+      .map((p) => p.name as ProviderName);
+
+    const characterCount = scene.context?.activeCharacterIds?.length ?? shot.characterIds.length;
+    const hasEnvironment = !!scene.context?.environmentId;
+
+    routingDecision = recommendProvider(shot, {
+      policy,
+      availableProviders,
+      sceneContext: { characterCount, hasEnvironment },
+    });
+
+    selectedProvider = routingDecision.selectedProvider;
+  }
+
+  if (selectedProvider && !registry.has(selectedProvider)) {
+    return c.json({ error: `Provider "${selectedProvider}" is not available` }, 400);
   }
 
   try {
@@ -61,7 +94,18 @@ renderRoutes.post("/", async (c) => {
     const { enrichedPrompt } = applyContinuityToPrompt(shot, continuityCtx);
     const finalPrompt = prompt || enrichedPrompt;
 
-    const job = await orchestrator.submitJob(projectId, shot, provider, finalPrompt);
+    const job = await orchestrator.submitJob(projectId, shot, selectedProvider, finalPrompt);
+
+    // Attach routing decision metadata to job
+    if (routingDecision) {
+      const enrichedJob = {
+        ...job,
+        metadata: { routingDecision },
+      };
+      store.saveRenderJob(enrichedJob as any);
+      return c.json(enrichedJob, 201);
+    }
+
     store.saveRenderJob(job);
     return c.json(job, 201);
   } catch (err: unknown) {

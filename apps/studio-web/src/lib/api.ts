@@ -12,6 +12,9 @@ import type {
   VirtueEditorTimeline,
   VirtueExportJob,
   VirtueTransition,
+  VirtueRoutingDecision,
+  VirtueProviderCapabilities,
+  VirtueRoutingPolicy,
 } from "@virtue/types";
 
 interface EnrichmentResult {
@@ -130,10 +133,11 @@ export const api = {
     shotId: string,
     provider?: string,
     prompt?: string,
+    routingMode?: string,
   ) =>
     request<VirtueRenderJob>("/api/renders", {
       method: "POST",
-      body: JSON.stringify({ projectId, sceneId, shotId, provider, prompt }),
+      body: JSON.stringify({ projectId, sceneId, shotId, provider, prompt, routingMode }),
     }),
   pollRender: (id: string) =>
     request<VirtueRenderJob>(`/api/renders/${id}/poll`, { method: "POST" }),
@@ -336,4 +340,26 @@ export const api = {
     request<VirtueExportJob>(`/api/editor/exports/${id}`),
   pollExport: (id: string) =>
     request<VirtueExportJob>(`/api/editor/exports/${id}/poll`, { method: "POST" }),
+
+  // ─── Routing ──────────────────────────────────────────────
+
+  recommendProvider: (data: {
+    projectId?: string;
+    sceneId?: string;
+    shotId?: string;
+    policy?: string;
+    shot?: { shotType: string; description: string; prompt?: string; durationSec?: number; cameraMove?: string; characterIds?: string[] };
+  }) =>
+    request<VirtueRoutingDecision>("/api/routing/recommend", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  getProviderCapabilities: () =>
+    request<(VirtueProviderCapabilities & { registered: boolean; available: boolean })[]>(
+      "/api/routing/providers/capabilities",
+    ),
+  getRoutingPolicies: () =>
+    request<Record<string, VirtueRoutingPolicy>>("/api/routing/policies"),
+  getRenderRouting: (renderJobId: string) =>
+    request<VirtueRoutingDecision>(`/api/routing/renders/${renderJobId}`),
 };

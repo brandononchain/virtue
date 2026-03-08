@@ -1,0 +1,14 @@
+{
+  "name": "Surreal Dream Sequence",
+  "description": "Abstract, heavily stylized dream — stylization and artistic flexibility matter most.",
+  "shot": {
+    "shotType": "wide",
+    "description": "A figure floats above a shattered mirror landscape. Colors shift between deep purple and gold. Time feels distorted.",
+    "prompt": "Surreal dreamscape, floating figure above broken mirrors, shifting purple and gold palette, ethereal atmosphere, abstract cinematic, painterly style",
+    "durationSec": 5,
+    "cameraMove": "crane_up",
+    "characterIds": ["dreamer"]
+  },
+  "expectedTraits": ["stylized", "wide cinematic"],
+  "notes": "Should favor providers with strong stylization support. Photorealism not needed."
+}

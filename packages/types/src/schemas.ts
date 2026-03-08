@@ -369,3 +369,77 @@ export const VirtueProviderSchema = z.object({
   enabled: z.boolean().default(false),
 });
 export type VirtueProvider = z.infer<typeof VirtueProviderSchema>;
+
+// ─── Routing: Shot Requirements ─────────────────────────
+export const VirtueShotRequirementsSchema = z.object({
+  shotType: z.string(),
+  framing: z.string().default("standard"),
+  movement: z.string().default("static"),
+  duration: z.number().positive(),
+  realismLevel: z.number().min(0).max(1).default(0.7),
+  stylizationLevel: z.number().min(0).max(1).default(0.3),
+  continuityCritical: z.boolean().default(false),
+  referenceAssetsPresent: z.boolean().default(false),
+  environmentComplexity: z.number().min(0).max(1).default(0.5),
+  characterComplexity: z.number().min(0).max(1).default(0.3),
+  actionComplexity: z.number().min(0).max(1).default(0.3),
+  dialogueCloseup: z.boolean().default(false),
+  wideCinematicScene: z.boolean().default(false),
+  imageConditioningNeeded: z.boolean().default(false),
+  turnaroundPriority: z.number().min(0).max(1).default(0.5),
+  costSensitivity: z.number().min(0).max(1).default(0.5),
+});
+export type VirtueShotRequirements = z.infer<typeof VirtueShotRequirementsSchema>;
+
+// ─── Routing: Provider Capabilities ─────────────────────
+export const VirtueProviderCapabilitiesSchema = z.object({
+  provider: z.enum(["mock", "luma", "openai", "google"]),
+  displayName: z.string(),
+  supportsTextToVideo: z.boolean().default(true),
+  supportsImageToVideo: z.boolean().default(false),
+  supportsReferenceImages: z.boolean().default(false),
+  supportsLongDuration: z.boolean().default(false),
+  supportsHighMotion: z.boolean().default(false),
+  supportsCharacterConsistency: z.boolean().default(false),
+  supportsStylizedOutput: z.boolean().default(false),
+  supportsPhotorealism: z.boolean().default(false),
+  supportsFastTurnaround: z.boolean().default(false),
+  supportsFineCameraControl: z.boolean().default(false),
+  maxDurationSeconds: z.number().positive().default(10),
+  qualityTier: z.enum(["low", "medium", "high", "premium"]).default("medium"),
+  speedTier: z.enum(["slow", "medium", "fast"]).default("medium"),
+  costTier: z.enum(["free", "low", "medium", "high"]).default("medium"),
+});
+export type VirtueProviderCapabilities = z.infer<typeof VirtueProviderCapabilitiesSchema>;
+
+// ─── Routing: Score ─────────────────────────────────────
+export const VirtueRoutingScoreSchema = z.object({
+  provider: z.enum(["mock", "luma", "openai", "google"]),
+  displayName: z.string(),
+  totalScore: z.number(),
+  breakdown: z.record(z.number()),
+  available: z.boolean(),
+});
+export type VirtueRoutingScore = z.infer<typeof VirtueRoutingScoreSchema>;
+
+// ─── Routing: Decision ──────────────────────────────────
+export const VirtueRoutingDecisionSchema = z.object({
+  selectedProvider: z.enum(["mock", "luma", "openai", "google"]),
+  policy: z.enum(["auto_quality", "auto_speed", "auto_cost", "balanced", "manual"]),
+  rationale: z.string(),
+  scores: z.array(VirtueRoutingScoreSchema),
+  requirements: VirtueShotRequirementsSchema,
+  manualOverride: z.boolean().default(false),
+  createdAt: z.string().datetime(),
+});
+export type VirtueRoutingDecision = z.infer<typeof VirtueRoutingDecisionSchema>;
+
+// ─── Routing: Policy ────────────────────────────────────
+export const VirtueRoutingPolicySchema = z.object({
+  mode: z.enum(["auto_quality", "auto_speed", "auto_cost", "balanced", "manual"]),
+  qualityWeight: z.number().min(0).max(1).default(0.4),
+  speedWeight: z.number().min(0).max(1).default(0.3),
+  costWeight: z.number().min(0).max(1).default(0.3),
+  preferredProvider: z.enum(["mock", "luma", "openai", "google"]).optional(),
+});
+export type VirtueRoutingPolicy = z.infer<typeof VirtueRoutingPolicySchema>;

@@ -1,0 +1,14 @@
+{
+  "name": "Wide Establishing Shot",
+  "description": "Epic landscape establishing shot — environment quality and cinematic scale matter most.",
+  "shot": {
+    "shotType": "establishing",
+    "description": "Aerial view of a fog-covered mountain valley at dawn. A small village sits in the distance.",
+    "prompt": "Aerial establishing shot of a misty mountain valley at sunrise, small village in the distance, volumetric fog, golden hour lighting, epic cinematic scale, photorealistic landscape",
+    "durationSec": 4,
+    "cameraMove": "drone_forward",
+    "characterIds": []
+  },
+  "expectedTraits": ["wide cinematic", "photoreal"],
+  "notes": "No characters — environment quality is key. Should favor providers with photorealism and camera control."
+}

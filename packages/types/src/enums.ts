@@ -93,3 +93,35 @@ export const PacingPreset = {
   TRAILER: "trailer",
 } as const;
 export type PacingPreset = (typeof PacingPreset)[keyof typeof PacingPreset];
+
+export const RoutingMode = {
+  AUTO_QUALITY: "auto_quality",
+  AUTO_SPEED: "auto_speed",
+  AUTO_COST: "auto_cost",
+  BALANCED: "balanced",
+  MANUAL: "manual",
+} as const;
+export type RoutingMode = (typeof RoutingMode)[keyof typeof RoutingMode];
+
+export const QualityTier = {
+  LOW: "low",
+  MEDIUM: "medium",
+  HIGH: "high",
+  PREMIUM: "premium",
+} as const;
+export type QualityTier = (typeof QualityTier)[keyof typeof QualityTier];
+
+export const SpeedTier = {
+  SLOW: "slow",
+  MEDIUM: "medium",
+  FAST: "fast",
+} as const;
+export type SpeedTier = (typeof SpeedTier)[keyof typeof SpeedTier];
+
+export const CostTier = {
+  FREE: "free",
+  LOW: "low",
+  MEDIUM: "medium",
+  HIGH: "high",
+} as const;
+export type CostTier = (typeof CostTier)[keyof typeof CostTier];
