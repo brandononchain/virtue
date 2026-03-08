@@ -5,6 +5,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import type { StudioStats } from "@/lib/api";
 import type { VirtueProject, VirtueRenderJob } from "@virtue/types";
+import { RenderProgressCard } from "@/components/render-progress-card";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<StudioStats | null>(null);
@@ -18,9 +19,9 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="p-8 space-y-8 max-w-[1400px]">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8 max-w-[1400px]">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
+        <h1 className="text-[22px] sm:text-2xl font-bold tracking-tight text-zinc-100">
           Dashboard
         </h1>
         <p className="text-sm text-zinc-500 mt-1">
@@ -28,8 +29,52 @@ export default function DashboardPage() {
         </p>
       </div>
 
+      {/* System Status — mobile first */}
+      <div className="studio-panel lg:hidden">
+        <div className="px-4 py-3 border-b border-zinc-800/60">
+          <h2 className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
+            System
+          </h2>
+        </div>
+        <div className="p-4 space-y-3">
+          <StatusRow label="API" status="connected" />
+          <StatusRow label="Provider" status="mock" />
+          <StatusRow label="Skills Engine" status="loaded" />
+          <StatusRow
+            label="Render Queue"
+            status={
+              stats && stats.renders.active > 0
+                ? `${stats.renders.active} active`
+                : "idle"
+            }
+          />
+        </div>
+      </div>
+
+      {/* Quick Actions — mobile only */}
+      <div className="grid grid-cols-2 gap-3 lg:hidden">
+        <Link
+          href="/projects"
+          className="studio-panel flex flex-col items-center justify-center p-4 min-h-[80px] active:bg-zinc-800/40 transition-colors touch-manipulation"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6 text-zinc-400 mb-2">
+            <path d="M12 4v16m8-8H4" strokeLinecap="round" />
+          </svg>
+          <span className="text-[13px] font-medium text-zinc-300">New Project</span>
+        </Link>
+        <Link
+          href="/skills"
+          className="studio-panel flex flex-col items-center justify-center p-4 min-h-[80px] active:bg-zinc-800/40 transition-colors touch-manipulation"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6 text-zinc-400 mb-2">
+            <path d="M13 10V3L4 14h7v7l9-11h-7z" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span className="text-[13px] font-medium text-zinc-300">Browse Skills</span>
+        </Link>
+      </div>
+
       {/* Stats */}
-      <div className="grid grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <StatCard label="Projects" value={stats?.projects ?? 0} />
         <StatCard label="Scenes" value={stats?.scenes ?? 0} />
         <StatCard label="Shots" value={stats?.shots ?? 0} />
@@ -45,16 +90,17 @@ export default function DashboardPage() {
         <StatCard label="Skills" value={stats?.skills ?? 0} />
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      {/* Projects + System (desktop) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
         {/* Recent Projects */}
-        <div className="col-span-2 studio-panel">
-          <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800/60">
-            <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+        <div className="lg:col-span-2 studio-panel">
+          <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-zinc-800/60">
+            <h2 className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
               Projects
             </h2>
             <Link
               href="/projects"
-              className="text-[11px] text-zinc-600 hover:text-zinc-400 transition-colors"
+              className="text-[11px] text-zinc-600 hover:text-zinc-400 transition-colors min-h-[44px] flex items-center"
             >
               View all
             </Link>
@@ -74,16 +120,16 @@ export default function DashboardPage() {
                   <Link
                     key={project.id}
                     href={`/projects/${project.id}`}
-                    className="flex items-center gap-4 px-5 py-3 hover:bg-zinc-900/50 transition-colors"
+                    className="flex items-center gap-4 px-4 sm:px-5 py-3.5 sm:py-3 active:bg-zinc-900/50 hover:bg-zinc-900/50 transition-colors touch-manipulation"
                   >
-                    <div className="w-8 h-8 rounded bg-zinc-800 flex items-center justify-center text-zinc-500 text-xs font-mono">
+                    <div className="w-10 h-10 sm:w-8 sm:h-8 rounded-lg sm:rounded bg-zinc-800 flex items-center justify-center text-zinc-500 text-sm sm:text-xs font-mono shrink-0">
                       {project.name.charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-zinc-200 truncate">
+                      <p className="text-[14px] sm:text-sm font-medium text-zinc-200 truncate">
                         {project.name}
                       </p>
-                      <p className="text-xs text-zinc-600 truncate">
+                      <p className="text-[12px] sm:text-xs text-zinc-600 truncate">
                         {project.description || "No description"}
                       </p>
                     </div>
@@ -102,8 +148,8 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* System & Quick Actions */}
-        <div className="space-y-4">
+        {/* System & Quick Actions — desktop only */}
+        <div className="hidden lg:block space-y-4">
           <div className="studio-panel">
             <div className="px-5 py-3 border-b border-zinc-800/60">
               <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
@@ -142,50 +188,21 @@ export default function DashboardPage() {
 
       {/* Recent Renders */}
       {recentJobs.length > 0 && (
-        <div className="studio-panel">
-          <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800/60">
-            <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
               Recent Renders
             </h2>
             <Link
               href="/renders"
-              className="text-[11px] text-zinc-600 hover:text-zinc-400 transition-colors"
+              className="text-[11px] text-zinc-600 hover:text-zinc-400 transition-colors min-h-[44px] flex items-center"
             >
               View all
             </Link>
           </div>
-          <div className="divide-y divide-zinc-800/40">
+          <div className="space-y-2">
             {recentJobs.map((job) => (
-              <div
-                key={job.id}
-                className="flex items-center gap-4 px-5 py-3"
-              >
-                <RenderStatusDot status={job.status} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-zinc-300 truncate">
-                    {job.prompt}
-                  </p>
-                </div>
-                <div className="w-24 shrink-0">
-                  <div className="h-1 rounded-full bg-zinc-800">
-                    <div
-                      className={`h-1 rounded-full transition-all ${
-                        job.status === "completed"
-                          ? "bg-emerald-500"
-                          : job.status === "failed"
-                            ? "bg-red-500"
-                            : "bg-blue-500"
-                      }`}
-                      style={{ width: `${job.progress}%` }}
-                    />
-                  </div>
-                </div>
-                <span
-                  className={`text-[10px] font-medium uppercase tracking-wide w-20 text-right ${statusTextColor(job.status)}`}
-                >
-                  {job.status}
-                </span>
-              </div>
+              <RenderProgressCard key={job.id} job={job} compact />
             ))}
           </div>
         </div>
@@ -220,7 +237,7 @@ function StatCard({
 
 function StatusRow({ label, status }: { label: string; status: string }) {
   return (
-    <div className="flex items-center justify-between text-sm">
+    <div className="flex items-center justify-between text-sm min-h-[36px]">
       <span className="text-zinc-500">{label}</span>
       <span className="flex items-center gap-1.5 text-xs text-emerald-500">
         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -234,39 +251,9 @@ function QuickAction({ label, href }: { label: string; href: string }) {
   return (
     <Link
       href={href}
-      className="flex items-center rounded-md px-3 py-2 text-sm text-zinc-400 transition-colors hover:bg-zinc-900 hover:text-zinc-200"
+      className="flex items-center rounded-md px-3 py-2 text-sm text-zinc-400 transition-colors hover:bg-zinc-900 hover:text-zinc-200 min-h-[44px]"
     >
       {label}
     </Link>
   );
-}
-
-function RenderStatusDot({ status }: { status: string }) {
-  const color =
-    status === "completed"
-      ? "bg-emerald-500"
-      : status === "failed"
-        ? "bg-red-400"
-        : status === "generating" || status === "post-processing"
-          ? "bg-blue-400 animate-pulse"
-          : status === "preparing"
-            ? "bg-amber-400 animate-pulse"
-            : "bg-zinc-600";
-  return <span className={`h-2 w-2 rounded-full shrink-0 ${color}`} />;
-}
-
-function statusTextColor(status: string): string {
-  switch (status) {
-    case "completed":
-      return "text-emerald-500";
-    case "failed":
-      return "text-red-400";
-    case "generating":
-    case "post-processing":
-      return "text-blue-400";
-    case "preparing":
-      return "text-amber-400";
-    default:
-      return "text-zinc-500";
-  }
 }
