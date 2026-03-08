@@ -600,3 +600,71 @@ export const VirtueTrailerPlanSchema = z.object({
   createdAt: z.string().datetime(),
 });
 export type VirtueTrailerPlan = z.infer<typeof VirtueTrailerPlanSchema>;
+
+// ─── Character State (Simulation) ──────────────────────
+export const VirtueCharacterStateSchema = z.object({
+  characterId: z.string(),
+  location: z.string().default("unknown"),
+  emotionalState: z.string().default("neutral"),
+  physicalCondition: z.string().default("normal"),
+  possessions: z.array(z.string()).default([]),
+  relationships: z.record(z.string()).default({}),
+});
+export type VirtueCharacterState = z.infer<typeof VirtueCharacterStateSchema>;
+
+// ─── Environment State (Simulation) ────────────────────
+export const VirtueEnvironmentStateSchema = z.object({
+  environmentId: z.string(),
+  timeOfDay: z.string().default("day"),
+  weather: z.string().default("clear"),
+  damageState: z.string().default("intact"),
+  lightingState: z.string().default("natural"),
+  occupancy: z.array(z.string()).default([]),
+});
+export type VirtueEnvironmentState = z.infer<typeof VirtueEnvironmentStateSchema>;
+
+// ─── Prop State (Simulation) ───────────────────────────
+export const VirtuePropStateSchema = z.object({
+  propId: z.string(),
+  location: z.string().default("unknown"),
+  owner: z.string().optional(),
+  condition: z.string().default("intact"),
+  visibility: z.enum(["visible", "hidden", "destroyed"]).default("visible"),
+});
+export type VirtuePropState = z.infer<typeof VirtuePropStateSchema>;
+
+// ─── Story Event ───────────────────────────────────────
+export const VirtueStoryEventSchema = z.object({
+  id: z.string(),
+  sceneId: z.string(),
+  description: z.string(),
+  affectedCharacters: z.array(z.string()).default([]),
+  affectedEnvironments: z.array(z.string()).default([]),
+  affectedProps: z.array(z.string()).default([]),
+  timestamp: z.string().datetime(),
+});
+export type VirtueStoryEvent = z.infer<typeof VirtueStoryEventSchema>;
+
+// ─── World State ───────────────────────────────────────
+export const VirtueWorldStateSchema = z.object({
+  projectId: z.string(),
+  characters: z.array(VirtueCharacterStateSchema).default([]),
+  environments: z.array(VirtueEnvironmentStateSchema).default([]),
+  props: z.array(VirtuePropStateSchema).default([]),
+  storyEvents: z.array(VirtueStoryEventSchema).default([]),
+  timelinePosition: z.number().int().default(0),
+  activeConditions: z.array(z.string()).default([]),
+  updatedAt: z.string().datetime(),
+});
+export type VirtueWorldState = z.infer<typeof VirtueWorldStateSchema>;
+
+// ─── Simulation Context ────────────────────────────────
+export const VirtueSimulationContextSchema = z.object({
+  sceneId: z.string(),
+  characterStates: z.array(VirtueCharacterStateSchema).default([]),
+  environmentState: VirtueEnvironmentStateSchema.optional(),
+  propStates: z.array(VirtuePropStateSchema).default([]),
+  activeConditions: z.array(z.string()).default([]),
+  narrativeSummary: z.string().default(""),
+});
+export type VirtueSimulationContext = z.infer<typeof VirtueSimulationContextSchema>;

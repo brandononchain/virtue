@@ -164,6 +164,21 @@ export function Sidebar() {
             </span>
             Autonomous
           </Link>
+          <Link
+            href="/studio/world"
+            className={`flex items-center gap-3 rounded-md px-3 py-2 text-[13px] transition-colors ${
+              pathname.startsWith("/studio/world")
+                ? "bg-zinc-800/60 text-zinc-100 font-medium"
+                : "text-zinc-500 hover:bg-zinc-800/30 hover:text-zinc-300"
+            }`}
+          >
+            <span className="w-4 h-4 shrink-0 opacity-70">
+              <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+                <path d="M8 0a8 8 0 100 16A8 8 0 008 0zM1.5 8a6.5 6.5 0 0112.58-2.33l-3.8 1.52-2.28-1.9-4.5 2.25V8zm0 .67l4.5-2.25 2.28 1.9 3.8-1.52A6.48 6.48 0 0114.5 8v.67l-4.5 2.25-2.28-1.9-3.8 1.52A6.48 6.48 0 011.5 8.67zM8 14.5a6.47 6.47 0 01-4.58-1.88l3.8-1.52 2.28 1.9 4.5-2.25v.75A6.5 6.5 0 018 14.5z" />
+              </svg>
+            </span>
+            World
+          </Link>
         </div>
 
         {/* Continuity Section */}

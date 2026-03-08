@@ -26,6 +26,8 @@ import type {
   VirtuePromptImprovement,
   VirtueHighlight,
   VirtueTrailerPlan,
+  VirtueWorldState,
+  VirtueSimulationContext,
 } from "@virtue/types";
 
 interface EnrichmentResult {
@@ -486,5 +488,36 @@ export const api = {
     request<VirtueTrailerPlan>("/api/autonomous/generate-trailer", {
       method: "POST",
       body: JSON.stringify({ projectId, title }),
+    }),
+
+  // ─── Simulation Engine ─────────────────────────────────
+
+  getWorldState: (projectId: string) =>
+    request<VirtueWorldState>(`/api/simulation/world/${projectId}`),
+  initializeWorld: (projectId: string) =>
+    request<VirtueWorldState>(`/api/simulation/world/${projectId}/initialize`, { method: "POST" }),
+  updateWorldState: (projectId: string, data: {
+    characters?: { characterId: string; [key: string]: unknown }[];
+    environments?: { environmentId: string; [key: string]: unknown }[];
+    props?: { propId: string; [key: string]: unknown }[];
+    conditions?: string[];
+  }) =>
+    request<VirtueWorldState>(`/api/simulation/world/${projectId}/update`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  simulateScene: (projectId: string, sceneId: string) =>
+    request<VirtueWorldState>("/api/simulation/simulate/scene", {
+      method: "POST",
+      body: JSON.stringify({ projectId, sceneId }),
+    }),
+  getSimulationContext: (projectId: string, sceneId: string) =>
+    request<VirtueSimulationContext & { promptFragment: string }>(
+      `/api/simulation/context/${projectId}/${sceneId}`,
+    ),
+  addStoryEvent: (projectId: string, data: { sceneId?: string; description: string; affectedCharacters?: string[]; affectedEnvironments?: string[]; affectedProps?: string[] }) =>
+    request<VirtueWorldState>(`/api/simulation/world/${projectId}/event`, {
+      method: "POST",
+      body: JSON.stringify(data),
     }),
 };

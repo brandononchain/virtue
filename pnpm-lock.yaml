@@ -56,6 +56,9 @@ importers:
       '@virtue/routing-engine':
         specifier: workspace:*
         version: link:../../packages/routing-engine
+      '@virtue/simulation-engine':
+        specifier: workspace:*
+        version: link:../../packages/simulation-engine
       '@virtue/skills-engine':
         specifier: workspace:*
         version: link:../../packages/skills-engine
@@ -280,6 +283,16 @@ importers:
       '@virtue/validation':
         specifier: workspace:*
         version: link:../validation
+    devDependencies:
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
+  packages/simulation-engine:
+    dependencies:
+      '@virtue/types':
+        specifier: workspace:*
+        version: link:../types
     devDependencies:
       typescript:
         specifier: ^5.5.0

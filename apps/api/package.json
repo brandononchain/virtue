@@ -29,6 +29,7 @@
     "@virtue/routing-engine": "workspace:*",
     "@virtue/review-engine": "workspace:*",
     "@virtue/autonomous-engine": "workspace:*",
+    "@virtue/simulation-engine": "workspace:*",
     "@hono/node-server": "^1.12.0",
     "hono": "^4.4.0"
   },
