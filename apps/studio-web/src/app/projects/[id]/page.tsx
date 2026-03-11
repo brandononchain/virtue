@@ -5,6 +5,34 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { api } from "@/lib/api";
+import {
+  ArrowLeft,
+  Plus,
+  X,
+  MessageSquare,
+  CheckCircle2,
+  Clock,
+  Film,
+  Camera,
+  Aperture,
+  Sun,
+  Clapperboard,
+  Layers,
+  Users,
+  MapPin,
+  Sparkles,
+  Send,
+  Play,
+  BarChart3,
+  Route,
+  Eye,
+  Star,
+  GitCompare,
+  AlertCircle,
+  Loader2,
+  Box,
+  Paintbrush,
+} from "lucide-react";
 import type {
   VirtueProject,
   VirtueShot,
@@ -32,7 +60,7 @@ const ROUTING_MODES = [
 ] as const;
 
 const APPROVAL_STATES = [
-  { value: "pending", label: "Pending", color: "text-zinc-500 bg-zinc-800/60 border-zinc-700/40" },
+  { value: "pending", label: "Pending", color: "text-virtue-text-muted bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)]" },
   { value: "needs_changes", label: "Changes", color: "text-amber-400 bg-amber-950/30 border-amber-800/40" },
   { value: "approved", label: "Approved", color: "text-emerald-400 bg-emerald-950/30 border-emerald-800/40" },
   { value: "rejected", label: "Rejected", color: "text-red-400 bg-red-950/30 border-red-800/40" },
@@ -43,14 +71,14 @@ const WORKFLOW_STAGES = [
 ] as const;
 
 const STAGE_COLORS: Record<string, string> = {
-  concept: "bg-zinc-700",
+  concept: "bg-[rgba(255,255,255,0.08)]",
   planning: "bg-blue-700",
   previz: "bg-purple-700",
   rendering: "bg-amber-600",
   review: "bg-cyan-600",
   approved: "bg-emerald-600",
   final_exported: "bg-green-500",
-  archived: "bg-zinc-600",
+  archived: "bg-[rgba(255,255,255,0.08)]",
 };
 
 export default function ProjectDetailPage() {
@@ -302,8 +330,11 @@ export default function ProjectDetailPage() {
 
   if (!project) {
     return (
-      <div className="p-8">
-        <p className="text-zinc-500 text-sm">Loading project...</p>
+      <div className="p-5 sm:p-8 lg:p-10 animate-fade-in">
+        <div className="flex items-center gap-3">
+          <Loader2 className="w-4 h-4 text-virtue-accent animate-spin" />
+          <p className="text-virtue-text-muted text-sm">Loading project...</p>
+        </div>
       </div>
     );
   }
@@ -314,23 +345,24 @@ export default function ProjectDetailPage() {
     : 0;
 
   return (
-    <div className="flex h-full flex-col lg:flex-row">
+    <div className="flex h-full flex-col lg:flex-row animate-fade-in">
       {/* Main content */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+      <div className="flex-1 overflow-y-auto p-5 sm:p-8 lg:p-10 space-y-5 sm:space-y-6">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <Link
               href="/projects"
-              className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors min-h-[44px] sm:min-h-0 flex items-center"
+              className="text-xs text-virtue-text-muted hover:text-virtue-accent transition-colors min-h-[44px] sm:min-h-0 flex items-center gap-1.5"
             >
+              <ArrowLeft className="w-3 h-3" />
               Projects
             </Link>
-            <h1 className="text-[22px] sm:text-2xl font-bold tracking-tight text-zinc-100 mt-1">
+            <h1 className="text-[22px] sm:text-2xl font-bold tracking-tight text-virtue-text mt-1">
               {project.name}
             </h1>
             {project.description && (
-              <p className="text-[13px] sm:text-sm text-zinc-500 mt-1 max-w-xl">
+              <p className="text-[13px] sm:text-sm text-virtue-text-secondary mt-1 max-w-xl">
                 {project.description}
               </p>
             )}
@@ -343,7 +375,7 @@ export default function ProjectDetailPage() {
             >
               {projectWorkflow?.stage || "concept"}
             </button>
-            <span className="rounded bg-zinc-800 px-2 py-1 text-[10px] text-zinc-500 font-mono uppercase hidden sm:inline">
+            <span className="rounded bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] px-2 py-1 text-[10px] text-virtue-text-muted font-mono uppercase hidden sm:inline">
               {project.provider}
             </span>
           </div>
@@ -355,7 +387,7 @@ export default function ProjectDetailPage() {
             <div
               key={stage}
               className={`h-1.5 flex-1 transition-colors ${
-                i <= currentStageIdx ? STAGE_COLORS[stage] : "bg-zinc-800/60"
+                i <= currentStageIdx ? STAGE_COLORS[stage] : "bg-[rgba(255,255,255,0.06)]"
               }`}
               title={stage}
             />
@@ -364,37 +396,38 @@ export default function ProjectDetailPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          <MiniStat label="Scenes" value={project.scenes.length} />
-          <MiniStat label="Shots" value={totalShots} />
-          <MiniStat label="Characters" value={project.characters?.length ?? 0} />
-          <MiniStat label="Environments" value={project.environments?.length ?? 0} />
-          <MiniStat label="Props" value={project.props?.length ?? 0} />
+          <MiniStat label="Scenes" value={project.scenes.length} icon={<Clapperboard className="w-3.5 h-3.5" />} />
+          <MiniStat label="Shots" value={totalShots} icon={<Film className="w-3.5 h-3.5" />} />
+          <MiniStat label="Characters" value={project.characters?.length ?? 0} icon={<Users className="w-3.5 h-3.5" />} />
+          <MiniStat label="Environments" value={project.environments?.length ?? 0} icon={<MapPin className="w-3.5 h-3.5" />} />
+          <MiniStat label="Props" value={project.props?.length ?? 0} icon={<Box className="w-3.5 h-3.5" />} />
         </div>
 
         {/* Scenes */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+            <h2 className="section-label">
               Scenes
             </h2>
             <button
               onClick={() => setShowAddScene(!showAddScene)}
-              className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+              className="text-xs text-virtue-text-muted hover:text-virtue-accent transition-colors flex items-center gap-1"
             >
-              + Add Scene
+              <Plus className="w-3 h-3" />
+              Add Scene
             </button>
           </div>
 
           {/* Add Scene Form */}
           {showAddScene && (
-            <div className="studio-panel p-4 space-y-3">
+            <div className="glass-panel p-4 space-y-3">
               <input
                 type="text"
                 value={sceneTitle}
                 onChange={(e) => setSceneTitle(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleAddScene()}
                 placeholder="Scene title..."
-                className="w-full rounded-md border border-zinc-800 bg-zinc-900/80 px-3 py-2.5 sm:py-2 text-[14px] sm:text-sm text-zinc-200 placeholder-zinc-600 focus:border-zinc-600 focus:outline-none"
+                className="glass-input w-full"
                 autoFocus
               />
               <div className="grid grid-cols-2 gap-3">
@@ -403,27 +436,27 @@ export default function ProjectDetailPage() {
                   value={sceneLocation}
                   onChange={(e) => setSceneLocation(e.target.value)}
                   placeholder="Location..."
-                  className="rounded-md border border-zinc-800 bg-zinc-900/80 px-3 py-2.5 sm:py-2 text-[14px] sm:text-sm text-zinc-200 placeholder-zinc-600 focus:border-zinc-600 focus:outline-none"
+                  className="glass-input"
                 />
                 <input
                   type="text"
                   value={sceneMood}
                   onChange={(e) => setSceneMood(e.target.value)}
                   placeholder="Mood..."
-                  className="rounded-md border border-zinc-800 bg-zinc-900/80 px-3 py-2.5 sm:py-2 text-[14px] sm:text-sm text-zinc-200 placeholder-zinc-600 focus:border-zinc-600 focus:outline-none"
+                  className="glass-input"
                 />
               </div>
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setShowAddScene(false)}
-                  className="text-sm text-zinc-500 hover:text-zinc-300 px-3 py-1"
+                  className="btn-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleAddScene}
                   disabled={!sceneTitle.trim()}
-                  className="rounded-md bg-zinc-100 px-4 py-1.5 text-sm font-medium text-zinc-900 hover:bg-white disabled:opacity-40 transition-colors"
+                  className="btn-primary"
                 >
                   Add Scene
                 </button>
@@ -433,45 +466,51 @@ export default function ProjectDetailPage() {
 
           {/* Scene List */}
           {project.scenes.length === 0 ? (
-            <div className="studio-panel p-12 text-center">
-              <p className="text-sm text-zinc-600">No scenes yet.</p>
+            <div className="glass-panel p-12 text-center">
+              <Clapperboard className="w-8 h-8 text-virtue-text-muted mx-auto mb-3 opacity-40" />
+              <p className="text-sm text-virtue-text-muted">No scenes yet.</p>
             </div>
           ) : (
             <div className="space-y-3">
               {project.scenes.map((scene, i) => (
-                <div key={scene.id} className="studio-panel">
+                <div key={scene.id} className="glass-panel overflow-hidden">
                   {/* Scene header */}
-                  <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800/40">
-                    <span className="text-xs text-zinc-600 font-mono w-6">
+                  <div className="flex items-center gap-3 px-4 py-3 border-b border-[rgba(255,255,255,0.06)]">
+                    <span className="text-xs text-virtue-text-muted font-mono w-6">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-zinc-200">
+                      <p className="text-sm font-medium text-virtue-text">
                         {scene.title}
                       </p>
                       <div className="flex gap-3 mt-0.5 flex-wrap">
                         {scene.location && (
-                          <span className="text-[10px] text-zinc-600">
+                          <span className="text-[10px] text-virtue-text-muted flex items-center gap-0.5">
+                            <MapPin className="w-2.5 h-2.5" />
                             {scene.location}
                           </span>
                         )}
                         {scene.mood && (
-                          <span className="text-[10px] text-zinc-600">
+                          <span className="text-[10px] text-virtue-text-muted flex items-center gap-0.5">
+                            <Sparkles className="w-2.5 h-2.5" />
                             {scene.mood}
                           </span>
                         )}
                         {scene.context?.environmentId && (
-                          <span className="text-[10px] text-emerald-600">
+                          <span className="text-[10px] text-emerald-600 flex items-center gap-0.5">
+                            <Layers className="w-2.5 h-2.5" />
                             env: {project.environments?.find(e => e.id === scene.context?.environmentId)?.name ?? "?"}
                           </span>
                         )}
                         {(scene.context?.activeCharacterIds?.length ?? 0) > 0 && (
-                          <span className="text-[10px] text-blue-600">
+                          <span className="text-[10px] text-blue-600 flex items-center gap-0.5">
+                            <Users className="w-2.5 h-2.5" />
                             {scene.context!.activeCharacterIds.length} char{scene.context!.activeCharacterIds.length !== 1 ? "s" : ""}
                           </span>
                         )}
                         {(scene.context?.activePropIds?.length ?? 0) > 0 && (
-                          <span className="text-[10px] text-amber-600">
+                          <span className="text-[10px] text-amber-600 flex items-center gap-0.5">
+                            <Box className="w-2.5 h-2.5" />
                             {scene.context!.activePropIds.length} prop{scene.context!.activePropIds.length !== 1 ? "s" : ""}
                           </span>
                         )}
@@ -479,14 +518,16 @@ export default function ProjectDetailPage() {
                     </div>
                     <Link
                       href={`/projects/${project.id}/scenes/${scene.id}/editor`}
-                      className="text-[10px] text-zinc-600 hover:text-purple-400 transition-colors uppercase tracking-wider"
+                      className="text-[10px] text-virtue-text-muted hover:text-purple-400 transition-colors uppercase tracking-wider flex items-center gap-1"
                     >
+                      <Paintbrush className="w-3 h-3" />
                       Editor
                     </Link>
                     <Link
                       href={`/projects/${project.id}/scenes/${scene.id}/timeline`}
-                      className="text-[10px] text-zinc-600 hover:text-emerald-400 transition-colors uppercase tracking-wider"
+                      className="text-[10px] text-virtue-text-muted hover:text-emerald-400 transition-colors uppercase tracking-wider flex items-center gap-1"
                     >
+                      <BarChart3 className="w-3 h-3" />
                       Timeline
                     </Link>
                     <button
@@ -495,18 +536,19 @@ export default function ProjectDetailPage() {
                           addingShotToScene === scene.id ? null : scene.id
                         )
                       }
-                      className="text-[10px] text-zinc-600 hover:text-zinc-300 transition-colors uppercase tracking-wider"
+                      className="text-[10px] text-virtue-text-muted hover:text-virtue-accent transition-colors uppercase tracking-wider flex items-center gap-1"
                     >
-                      + Shot
+                      <Plus className="w-3 h-3" />
+                      Shot
                     </button>
                   </div>
 
                   {/* Add Shot Form */}
                   {addingShotToScene === scene.id && (
-                    <div className="px-4 py-3 border-b border-zinc-800/40 space-y-3 bg-zinc-900/30">
+                    <div className="px-4 py-3 border-b border-[rgba(255,255,255,0.06)] space-y-3 bg-[rgba(255,255,255,0.02)]">
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[10px] text-zinc-600 mb-1">
+                          <label className="block text-[10px] text-virtue-text-muted mb-1">
                             Description
                           </label>
                           <input
@@ -514,12 +556,12 @@ export default function ProjectDetailPage() {
                             value={shotDesc}
                             onChange={(e) => setShotDesc(e.target.value)}
                             placeholder="What happens in this shot..."
-                            className="w-full rounded border border-zinc-800 bg-zinc-900 px-2.5 py-1.5 text-xs text-zinc-200 placeholder-zinc-600 focus:border-zinc-600 focus:outline-none"
+                            className="glass-input w-full text-xs"
                             autoFocus
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] text-zinc-600 mb-1">
+                          <label className="block text-[10px] text-virtue-text-muted mb-1">
                             Prompt
                           </label>
                           <input
@@ -527,17 +569,17 @@ export default function ProjectDetailPage() {
                             value={shotPrompt}
                             onChange={(e) => setShotPrompt(e.target.value)}
                             placeholder="Detailed generation prompt..."
-                            className="w-full rounded border border-zinc-800 bg-zinc-900 px-2.5 py-1.5 text-xs text-zinc-200 placeholder-zinc-600 focus:border-zinc-600 focus:outline-none"
+                            className="glass-input w-full text-xs"
                           />
                         </div>
                       </div>
                       <div className="grid grid-cols-5 gap-2">
                         <div>
-                          <label className="block text-[10px] text-zinc-600 mb-1">Shot Type</label>
+                          <label className="block text-[10px] text-virtue-text-muted mb-1">Shot Type</label>
                           <select
                             value={shotType}
                             onChange={(e) => setShotType(e.target.value)}
-                            className="w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-300 focus:outline-none"
+                            className="glass-input w-full text-xs"
                           >
                             <option value="wide">Wide</option>
                             <option value="medium">Medium</option>
@@ -550,32 +592,32 @@ export default function ProjectDetailPage() {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-[10px] text-zinc-600 mb-1">Duration</label>
-                          <input type="text" value={shotDuration} onChange={(e) => setShotDuration(e.target.value)} className="w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-300 focus:outline-none" />
+                          <label className="block text-[10px] text-virtue-text-muted mb-1">Duration</label>
+                          <input type="text" value={shotDuration} onChange={(e) => setShotDuration(e.target.value)} className="glass-input w-full text-xs" />
                         </div>
                         <div>
-                          <label className="block text-[10px] text-zinc-600 mb-1">Camera</label>
-                          <input type="text" value={shotCamera} onChange={(e) => setShotCamera(e.target.value)} className="w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-300 focus:outline-none" />
+                          <label className="block text-[10px] text-virtue-text-muted mb-1">Camera</label>
+                          <input type="text" value={shotCamera} onChange={(e) => setShotCamera(e.target.value)} className="glass-input w-full text-xs" />
                         </div>
                         <div>
-                          <label className="block text-[10px] text-zinc-600 mb-1">Lens</label>
-                          <input type="text" value={shotLens} onChange={(e) => setShotLens(e.target.value)} className="w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-300 focus:outline-none" />
+                          <label className="block text-[10px] text-virtue-text-muted mb-1">Lens</label>
+                          <input type="text" value={shotLens} onChange={(e) => setShotLens(e.target.value)} className="glass-input w-full text-xs" />
                         </div>
                         <div>
-                          <label className="block text-[10px] text-zinc-600 mb-1">Lighting</label>
-                          <input type="text" value={shotLighting} onChange={(e) => setShotLighting(e.target.value)} className="w-full rounded border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-300 focus:outline-none" />
+                          <label className="block text-[10px] text-virtue-text-muted mb-1">Lighting</label>
+                          <input type="text" value={shotLighting} onChange={(e) => setShotLighting(e.target.value)} className="glass-input w-full text-xs" />
                         </div>
                       </div>
                       <div className="flex justify-end gap-2">
-                        <button onClick={() => setAddingShotToScene(null)} className="text-xs text-zinc-500 hover:text-zinc-300 px-2 py-1">Cancel</button>
-                        <button onClick={() => handleAddShot(scene.id)} disabled={!shotDesc.trim()} className="rounded bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-900 hover:bg-white disabled:opacity-40 transition-colors">Add Shot</button>
+                        <button onClick={() => setAddingShotToScene(null)} className="btn-secondary">Cancel</button>
+                        <button onClick={() => handleAddShot(scene.id)} disabled={!shotDesc.trim()} className="btn-primary">Add Shot</button>
                       </div>
                     </div>
                   )}
 
                   {/* Shots */}
                   {scene.shots.length > 0 && (
-                    <div className="divide-y divide-zinc-800/30">
+                    <div className="divide-y divide-[rgba(255,255,255,0.04)]">
                       {scene.shots.map((shot, j) => {
                         const isSelected = selectedShot?.shot.id === shot.id;
                         return (
@@ -584,20 +626,23 @@ export default function ProjectDetailPage() {
                             onClick={() =>
                               setSelectedShot(isSelected ? null : { scene, shot })
                             }
-                            className={`w-full text-left flex items-center gap-3 px-4 py-3.5 sm:py-2.5 transition-colors touch-manipulation ${
-                              isSelected ? "bg-zinc-800/50" : "hover:bg-zinc-900/50 active:bg-zinc-800/30"
+                            className={`glass-card w-full text-left flex items-center gap-3 px-4 py-3.5 sm:py-2.5 transition-all touch-manipulation rounded-none border-0 ${
+                              isSelected
+                                ? "bg-virtue-accent/10 border-l-2 !border-l-virtue-accent"
+                                : "hover:bg-[rgba(255,255,255,0.03)] active:bg-[rgba(255,255,255,0.05)]"
                             }`}
                           >
-                            <span className="text-[10px] text-zinc-700 font-mono w-6 shrink-0">
+                            <span className="text-[10px] text-virtue-text-muted font-mono w-6 shrink-0">
                               {String(i + 1)}.{j + 1}
                             </span>
-                            <span className="rounded bg-zinc-800/80 px-1.5 py-0.5 text-[9px] text-zinc-500 font-mono uppercase shrink-0">
+                            <span className="rounded bg-[rgba(255,255,255,0.06)] px-1.5 py-0.5 text-[9px] text-virtue-text-secondary font-mono uppercase shrink-0">
                               {shot.shotType}
                             </span>
-                            <span className="text-xs text-zinc-400 truncate flex-1">
+                            <span className="text-xs text-virtue-text-secondary truncate flex-1">
                               {shot.description}
                             </span>
-                            <span className="text-[10px] text-zinc-600 shrink-0">
+                            <span className="text-[10px] text-virtue-text-muted shrink-0 flex items-center gap-1">
+                              <Clock className="w-2.5 h-2.5" />
                               {shot.durationSec}s
                             </span>
                           </button>
@@ -612,27 +657,28 @@ export default function ProjectDetailPage() {
         </div>
       </div>
 
-      {/* Shot Detail Panel — desktop */}
+      {/* Shot Detail Panel -- desktop */}
       {selectedShot && (
-        <div className="hidden lg:block w-96 border-l border-zinc-800/60 bg-[#080808] overflow-y-auto shrink-0">
-          <div className="px-5 py-4 border-b border-zinc-800/60 flex items-center justify-between">
-            <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+        <div className="hidden lg:block w-96 glass-panel border-l border-[rgba(255,255,255,0.06)] bg-[rgba(0,0,0,0.4)] overflow-y-auto shrink-0 rounded-none">
+          <div className="px-5 py-4 border-b border-[rgba(255,255,255,0.06)] flex items-center justify-between">
+            <h2 className="section-label !mb-0">
               Shot Detail
             </h2>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowComments(!showComments)}
-                className={`text-[10px] uppercase tracking-wider transition-colors ${
-                  showComments ? "text-cyan-400" : "text-zinc-600 hover:text-zinc-300"
+                className={`text-[10px] uppercase tracking-wider transition-colors flex items-center gap-1 ${
+                  showComments ? "text-virtue-accent" : "text-virtue-text-muted hover:text-virtue-text-secondary"
                 }`}
               >
+                <MessageSquare className="w-3 h-3" />
                 Comments{comments.length > 0 ? ` (${comments.length})` : ""}
               </button>
               <button
                 onClick={() => setSelectedShot(null)}
-                className="text-zinc-600 hover:text-zinc-300 text-xs transition-colors"
+                className="text-virtue-text-muted hover:text-virtue-text-secondary text-xs transition-colors"
               >
-                Close
+                <X className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -640,7 +686,8 @@ export default function ProjectDetailPage() {
           <div className="p-5 space-y-5">
             {/* Approval Badge */}
             <div>
-              <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+              <label className="block text-[10px] text-virtue-text-muted uppercase tracking-wider mb-1.5">
+                <CheckCircle2 className="w-3 h-3 inline mr-1 -mt-0.5" />
                 Approval Status
               </label>
               <div className="flex gap-1">
@@ -651,7 +698,7 @@ export default function ProjectDetailPage() {
                     className={`flex-1 rounded-md py-1.5 text-[9px] uppercase tracking-wider font-medium border transition-all ${
                       (shotApproval?.state || "pending") === as.value
                         ? as.color
-                        : "bg-zinc-900/40 border-zinc-800/60 text-zinc-600 hover:border-zinc-600"
+                        : "bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)] text-virtue-text-muted hover:border-[rgba(255,255,255,0.12)]"
                     }`}
                   >
                     {as.label}
@@ -659,17 +706,18 @@ export default function ProjectDetailPage() {
                 ))}
               </div>
               {shotApproval?.notes && (
-                <p className="text-[10px] text-zinc-500 mt-1 italic">{shotApproval.notes}</p>
+                <p className="text-[10px] text-virtue-text-secondary mt-1 italic">{shotApproval.notes}</p>
               )}
             </div>
 
             {/* Render Result Video */}
             {renderStatus?.output?.url && renderStatus.status === "completed" && (
               <div>
-                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] text-virtue-text-muted uppercase tracking-wider mb-1.5">
+                  <Play className="w-3 h-3 inline mr-1 -mt-0.5" />
                   Render Result
                 </label>
-                <div className="rounded-lg overflow-hidden border border-zinc-800/60 bg-black">
+                <div className="rounded-lg overflow-hidden border border-[rgba(255,255,255,0.06)] bg-black">
                   <video
                     src={renderStatus.output.url}
                     controls autoPlay loop muted playsInline
@@ -682,38 +730,41 @@ export default function ProjectDetailPage() {
             {/* Render Status */}
             {renderStatus && (
               <div>
-                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] text-virtue-text-muted uppercase tracking-wider mb-1.5">
                   Render Status
                 </label>
                 <div className="flex items-center gap-2 mb-1">
                   <span className={`h-2 w-2 rounded-full shrink-0 ${
                     renderStatus.status === "completed" ? "bg-emerald-500"
                     : renderStatus.status === "failed" ? "bg-red-400"
-                    : "bg-blue-400 animate-pulse"
+                    : "bg-virtue-accent animate-pulse"
                   }`} />
                   <span className={`text-xs font-medium uppercase ${
                     renderStatus.status === "completed" ? "text-emerald-400"
                     : renderStatus.status === "failed" ? "text-red-400"
-                    : "text-blue-400"
+                    : "text-virtue-accent"
                   }`}>
                     {renderStatus.status}
                   </span>
-                  <span className="text-xs text-zinc-600 ml-auto tabular-nums">
+                  <span className="text-xs text-virtue-text-muted ml-auto tabular-nums">
                     {renderStatus.progress}%
                   </span>
                 </div>
-                <div className="h-1.5 rounded-full bg-zinc-800">
+                <div className="h-1.5 rounded-full bg-[rgba(255,255,255,0.06)]">
                   <div
                     className={`h-1.5 rounded-full transition-all duration-500 ${
                       renderStatus.status === "completed" ? "bg-emerald-500"
                       : renderStatus.status === "failed" ? "bg-red-500"
-                      : "bg-blue-500"
+                      : "bg-virtue-accent"
                     }`}
                     style={{ width: `${renderStatus.progress}%` }}
                   />
                 </div>
                 {renderStatus.error && (
-                  <p className="text-xs text-red-400 mt-1.5">{renderStatus.error}</p>
+                  <p className="text-xs text-red-400 mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    {renderStatus.error}
+                  </p>
                 )}
               </div>
             )}
@@ -721,7 +772,8 @@ export default function ProjectDetailPage() {
             {/* Alternate Takes */}
             {takes.length > 0 && (
               <div>
-                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] text-virtue-text-muted uppercase tracking-wider mb-1.5">
+                  <Film className="w-3 h-3 inline mr-1 -mt-0.5" />
                   Takes ({takes.length})
                 </label>
                 <div className="space-y-1">
@@ -734,25 +786,31 @@ export default function ProjectDetailPage() {
                           ? "bg-emerald-950/20 border-emerald-900/30"
                           : take.status === "favorite"
                             ? "bg-amber-950/20 border-amber-900/30"
-                            : "bg-zinc-900/30 border-zinc-800/40 hover:border-zinc-700"
+                            : "bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)]"
                       }`}
                     >
                       <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${
                         take.status === "selected" ? "bg-emerald-400"
                         : take.status === "favorite" ? "bg-amber-400"
-                        : "bg-zinc-500"
+                        : "bg-virtue-text-muted"
                       }`} />
-                      <span className="text-[10px] text-zinc-300 flex-1">
+                      <span className="text-[10px] text-virtue-text-secondary flex-1">
                         {take.label || take.id.slice(0, 12)}
                       </span>
-                      <span className="text-[9px] text-zinc-600 font-mono uppercase">
+                      <span className="text-[9px] text-virtue-text-muted font-mono uppercase">
                         {take.provider}
                       </span>
                       {take.status === "selected" && (
-                        <span className="text-[8px] text-emerald-500 uppercase">active</span>
+                        <span className="text-[8px] text-emerald-500 uppercase flex items-center gap-0.5">
+                          <Eye className="w-2.5 h-2.5" />
+                          active
+                        </span>
                       )}
                       {take.status === "favorite" && (
-                        <span className="text-[8px] text-amber-500 uppercase">fav</span>
+                        <span className="text-[8px] text-amber-500 uppercase flex items-center gap-0.5">
+                          <Star className="w-2.5 h-2.5" />
+                          fav
+                        </span>
                       )}
                     </button>
                   ))}
@@ -760,8 +818,9 @@ export default function ProjectDetailPage() {
                 {takes.length >= 2 && (
                   <Link
                     href={`/studio/compare/new?renders=${takes.map((t) => t.renderJobId).join(",")}`}
-                    className="block mt-2 text-center text-[10px] text-cyan-500 hover:text-cyan-400 uppercase tracking-wider transition-colors"
+                    className="block mt-2 text-center text-[10px] text-virtue-accent hover:text-virtue-accent/80 uppercase tracking-wider transition-colors flex items-center justify-center gap-1"
                   >
+                    <GitCompare className="w-3 h-3" />
                     Compare Takes
                   </Link>
                 )}
@@ -770,24 +829,25 @@ export default function ProjectDetailPage() {
 
             {/* Description */}
             <div>
-              <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+              <label className="block text-[10px] text-virtue-text-muted uppercase tracking-wider mb-1.5">
                 Description
               </label>
-              <p className="text-sm text-zinc-300 leading-relaxed">
+              <p className="text-sm text-virtue-text-secondary leading-relaxed">
                 {selectedShot.shot.description}
               </p>
             </div>
 
             {/* Editable Prompt */}
             <div>
-              <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+              <label className="block text-[10px] text-virtue-text-muted uppercase tracking-wider mb-1.5">
+                <Sparkles className="w-3 h-3 inline mr-1 -mt-0.5" />
                 Generation Prompt
               </label>
               <textarea
                 value={renderPrompt}
                 onChange={(e) => setRenderPrompt(e.target.value)}
                 rows={4}
-                className="w-full rounded-md border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-xs text-zinc-300 placeholder-zinc-600 focus:border-zinc-600 focus:outline-none resize-none leading-relaxed"
+                className="glass-input w-full resize-none leading-relaxed"
                 placeholder="Enter generation prompt..."
               />
             </div>
@@ -795,7 +855,7 @@ export default function ProjectDetailPage() {
             {/* Continuity Context */}
             {continuityFragment && (
               <div>
-                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] text-virtue-text-muted uppercase tracking-wider mb-1.5">
                   Continuity Context
                 </label>
                 <div className="bg-emerald-950/20 border border-emerald-900/30 rounded-md p-3">
@@ -806,9 +866,10 @@ export default function ProjectDetailPage() {
               </div>
             )}
 
-            {/* ── Routing Intelligence ──────────────────── */}
+            {/* Routing Intelligence */}
             <div>
-              <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+              <label className="block text-[10px] text-virtue-text-muted uppercase tracking-wider mb-1.5">
+                <Route className="w-3 h-3 inline mr-1 -mt-0.5" />
                 Routing Mode
               </label>
               <div className="grid grid-cols-5 gap-1">
@@ -818,8 +879,8 @@ export default function ProjectDetailPage() {
                     onClick={() => setRoutingMode(mode.value)}
                     className={`rounded-md py-1.5 text-[9px] uppercase tracking-wider font-medium border transition-all ${
                       routingMode === mode.value
-                        ? "bg-cyan-900/40 border-cyan-700/60 text-cyan-400"
-                        : "bg-zinc-900/40 border-zinc-800/60 text-zinc-600 hover:border-zinc-600 hover:text-zinc-400"
+                        ? "bg-virtue-accent/20 border-virtue-accent/40 text-virtue-accent"
+                        : "bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)] text-virtue-text-muted hover:border-[rgba(255,255,255,0.12)] hover:text-virtue-text-secondary"
                     }`}
                     title={mode.desc}
                   >
@@ -832,26 +893,29 @@ export default function ProjectDetailPage() {
             {/* Routing Recommendation */}
             {routingMode !== "manual" && (
               <div>
-                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] text-virtue-text-muted uppercase tracking-wider mb-1.5">
                   Provider Recommendation
                 </label>
                 {loadingRouting ? (
-                  <div className="bg-zinc-900/60 rounded-md p-3 border border-zinc-800/40">
-                    <p className="text-[10px] text-zinc-500 animate-pulse">Analyzing shot requirements...</p>
+                  <div className="bg-[rgba(255,255,255,0.02)] rounded-md p-3 border border-[rgba(255,255,255,0.06)]">
+                    <p className="text-[10px] text-virtue-text-muted animate-pulse flex items-center gap-1.5">
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Analyzing shot requirements...
+                    </p>
                   </div>
                 ) : routingDecision ? (
                   <div className="space-y-2">
-                    <div className="bg-cyan-950/20 border border-cyan-900/30 rounded-md p-3">
+                    <div className="bg-virtue-accent/10 border border-virtue-accent/20 rounded-md p-3">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="h-2 w-2 rounded-full bg-cyan-400 shrink-0" />
-                        <span className="text-xs font-semibold text-cyan-300">
+                        <span className="h-2 w-2 rounded-full bg-virtue-accent shrink-0" />
+                        <span className="text-xs font-semibold text-virtue-accent">
                           {routingDecision.scores.find(s => s.provider === routingDecision.selectedProvider)?.displayName || routingDecision.selectedProvider}
                         </span>
-                        <span className="ml-auto rounded bg-cyan-900/40 px-1.5 py-0.5 text-[8px] text-cyan-500 font-mono uppercase">
+                        <span className="ml-auto rounded bg-virtue-accent/20 px-1.5 py-0.5 text-[8px] text-virtue-accent font-mono uppercase">
                           Recommended
                         </span>
                       </div>
-                      <p className="text-[10px] text-cyan-400/70 leading-relaxed">
+                      <p className="text-[10px] text-virtue-accent/70 leading-relaxed">
                         {routingDecision.rationale}
                       </p>
                     </div>
@@ -867,24 +931,24 @@ export default function ProjectDetailPage() {
                           disabled={!score.available}
                           className={`w-full flex items-center gap-2 rounded px-2.5 py-1.5 text-left transition-all border ${
                             score.provider === routingDecision.selectedProvider
-                              ? "bg-cyan-950/20 border-cyan-900/30"
+                              ? "bg-virtue-accent/10 border-virtue-accent/20"
                               : score.available
-                                ? "bg-zinc-900/30 border-zinc-800/40 hover:border-zinc-700"
-                                : "bg-zinc-900/20 border-zinc-800/30 opacity-50"
+                                ? "bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)]"
+                                : "bg-[rgba(255,255,255,0.01)] border-[rgba(255,255,255,0.03)] opacity-50"
                           }`}
                         >
                           <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${
-                            score.provider === routingDecision.selectedProvider ? "bg-cyan-400"
-                            : score.available ? "bg-zinc-500" : "bg-zinc-700"
+                            score.provider === routingDecision.selectedProvider ? "bg-virtue-accent"
+                            : score.available ? "bg-virtue-text-muted" : "bg-[rgba(255,255,255,0.08)]"
                           }`} />
-                          <span className="text-[10px] text-zinc-300 flex-1">
+                          <span className="text-[10px] text-virtue-text-secondary flex-1">
                             {score.displayName}
                           </span>
-                          <span className="text-[9px] text-zinc-500 font-mono tabular-nums">
+                          <span className="text-[9px] text-virtue-text-muted font-mono tabular-nums">
                             {(score.totalScore * 100).toFixed(0)}
                           </span>
                           {!score.available && (
-                            <span className="text-[8px] text-zinc-700">unavailable</span>
+                            <span className="text-[8px] text-virtue-text-muted">unavailable</span>
                           )}
                         </button>
                       ))}
@@ -897,7 +961,7 @@ export default function ProjectDetailPage() {
             {/* Manual Provider Picker (only in manual mode) */}
             {routingMode === "manual" && (
               <div>
-                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] text-virtue-text-muted uppercase tracking-wider mb-1.5">
                   Provider
                 </label>
                 <div className="flex gap-2">
@@ -908,20 +972,23 @@ export default function ProjectDetailPage() {
                       disabled={!p.available}
                       className={`flex-1 rounded-md px-3 py-2 text-xs font-medium transition-colors border ${
                         renderProvider === p.name
-                          ? "border-zinc-500 bg-zinc-800 text-zinc-200"
+                          ? "border-virtue-accent/50 bg-virtue-accent/10 text-virtue-text"
                           : p.available
-                            ? "border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700"
-                            : "border-zinc-800/50 text-zinc-700 cursor-not-allowed"
+                            ? "border-[rgba(255,255,255,0.06)] text-virtue-text-muted hover:text-virtue-text-secondary hover:border-[rgba(255,255,255,0.12)]"
+                            : "border-[rgba(255,255,255,0.03)] text-virtue-text-muted cursor-not-allowed"
                       }`}
                     >
                       {p.displayName}
                       {!p.available && (
-                        <span className="block text-[9px] text-zinc-700 mt-0.5">No API key</span>
+                        <span className="block text-[9px] text-virtue-text-muted mt-0.5">No API key</span>
                       )}
                     </button>
                   ))}
                   {providers.length === 0 && (
-                    <span className="text-xs text-zinc-600">Loading providers...</span>
+                    <span className="text-xs text-virtue-text-muted flex items-center gap-1">
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Loading providers...
+                    </span>
                   )}
                 </div>
               </div>
@@ -929,24 +996,26 @@ export default function ProjectDetailPage() {
 
             {/* Parameters Grid */}
             <div className="grid grid-cols-2 gap-3">
-              <ParamField label="Shot Type" value={selectedShot.shot.shotType} />
-              <ParamField label="Duration" value={`${selectedShot.shot.durationSec}s`} />
-              <ParamField label="Camera" value={selectedShot.shot.cameraMove} />
-              <ParamField label="Lens" value={selectedShot.shot.lens} />
-              <ParamField label="Lighting" value={selectedShot.shot.lighting} span2 />
+              <ParamField label="Shot Type" value={selectedShot.shot.shotType} icon={<Camera className="w-3 h-3" />} />
+              <ParamField label="Duration" value={`${selectedShot.shot.durationSec}s`} icon={<Clock className="w-3 h-3" />} />
+              <ParamField label="Camera" value={selectedShot.shot.cameraMove} icon={<Film className="w-3 h-3" />} />
+              <ParamField label="Lens" value={selectedShot.shot.lens} icon={<Aperture className="w-3 h-3" />} />
+              <ParamField label="Lighting" value={selectedShot.shot.lighting} icon={<Sun className="w-3 h-3" />} span2 />
             </div>
 
             {/* Scene Context */}
             <div>
-              <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+              <label className="block text-[10px] text-virtue-text-muted uppercase tracking-wider mb-1.5">
+                <Clapperboard className="w-3 h-3 inline mr-1 -mt-0.5" />
                 Scene
               </label>
-              <div className="bg-zinc-900/60 rounded-md p-3 border border-zinc-800/40 space-y-1">
-                <p className="text-xs text-zinc-300 font-medium">
+              <div className="bg-[rgba(255,255,255,0.02)] rounded-md p-3 border border-[rgba(255,255,255,0.06)] space-y-1">
+                <p className="text-xs text-virtue-text-secondary font-medium">
                   {selectedShot.scene.title}
                 </p>
                 {selectedShot.scene.location && (
-                  <p className="text-[10px] text-zinc-500">
+                  <p className="text-[10px] text-virtue-text-muted flex items-center gap-1">
+                    <MapPin className="w-2.5 h-2.5" />
                     {selectedShot.scene.location}
                   </p>
                 )}
@@ -956,14 +1025,14 @@ export default function ProjectDetailPage() {
             {/* Attached Skills */}
             {selectedShot.shot.skills.length > 0 && (
               <div>
-                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] text-virtue-text-muted uppercase tracking-wider mb-1.5">
                   Attached Skills
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   {selectedShot.shot.skills.map((skill) => (
                     <span
                       key={skill}
-                      className="rounded bg-zinc-800/80 px-2 py-0.5 text-[10px] text-zinc-400 font-mono"
+                      className="rounded bg-[rgba(255,255,255,0.06)] px-2 py-0.5 text-[10px] text-virtue-text-secondary font-mono"
                     >
                       {skill.replace("skill-", "")}
                     </span>
@@ -978,53 +1047,65 @@ export default function ProjectDetailPage() {
                 handleSubmitRender(selectedShot.scene.id, selectedShot.shot.id)
               }
               disabled={submitting || !renderPrompt.trim()}
-              className="w-full rounded-md bg-zinc-100 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-white disabled:opacity-40"
+              className="btn-primary w-full py-2.5 flex items-center justify-center gap-2"
             >
-              {submitting
-                ? "Submitting..."
-                : routingMode === "manual"
-                  ? `Render with ${renderProvider}`
-                  : `Render (${routingMode.replace("auto_", "").replace("_", " ")})`}
+              {submitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4" />
+                  {routingMode === "manual"
+                    ? `Render with ${renderProvider}`
+                    : `Render (${routingMode.replace("auto_", "").replace("_", " ")})`}
+                </>
+              )}
             </button>
 
             {/* Comments Panel */}
             {showComments && (
               <div>
-                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] text-virtue-text-muted uppercase tracking-wider mb-1.5">
+                  <MessageSquare className="w-3 h-3 inline mr-1 -mt-0.5" />
                   Comments
                 </label>
                 <div className="space-y-2 max-h-60 overflow-y-auto">
                   {comments.length === 0 ? (
-                    <p className="text-[10px] text-zinc-600 italic">No comments yet.</p>
+                    <p className="text-[10px] text-virtue-text-muted italic">No comments yet.</p>
                   ) : (
                     comments.map((comment) => (
                       <div
                         key={comment.id}
                         className={`rounded-md p-2.5 border ${
                           comment.resolvedAt
-                            ? "bg-zinc-900/20 border-zinc-800/30 opacity-60"
-                            : "bg-zinc-900/40 border-zinc-800/50"
+                            ? "bg-[rgba(255,255,255,0.01)] border-[rgba(255,255,255,0.03)] opacity-60"
+                            : "bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)]"
                         }`}
                       >
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-[10px] text-zinc-400 font-medium">
+                          <span className="text-[10px] text-virtue-text-secondary font-medium">
                             {comment.authorName}
                           </span>
-                          <span className="text-[9px] text-zinc-700">
+                          <span className="text-[9px] text-virtue-text-muted">
                             {new Date(comment.createdAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
                           </span>
                           {comment.resolvedAt ? (
-                            <span className="ml-auto text-[8px] text-emerald-600 uppercase">Resolved</span>
+                            <span className="ml-auto text-[8px] text-emerald-600 uppercase flex items-center gap-0.5">
+                              <CheckCircle2 className="w-2.5 h-2.5" />
+                              Resolved
+                            </span>
                           ) : (
                             <button
                               onClick={() => handleResolveComment(comment.id)}
-                              className="ml-auto text-[8px] text-zinc-600 hover:text-emerald-400 uppercase transition-colors"
+                              className="ml-auto text-[8px] text-virtue-text-muted hover:text-emerald-400 uppercase transition-colors"
                             >
                               Resolve
                             </button>
                           )}
                         </div>
-                        <p className="text-[11px] text-zinc-300 leading-relaxed">
+                        <p className="text-[11px] text-virtue-text-secondary leading-relaxed">
                           {comment.body}
                         </p>
                       </div>
@@ -1038,13 +1119,14 @@ export default function ProjectDetailPage() {
                     onChange={(e) => setNewComment(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
                     placeholder="Add a comment..."
-                    className="flex-1 rounded border border-zinc-800 bg-zinc-900 px-2.5 py-1.5 text-xs text-zinc-200 placeholder-zinc-600 focus:border-zinc-600 focus:outline-none"
+                    className="glass-input flex-1 text-xs"
                   />
                   <button
                     onClick={handleAddComment}
                     disabled={!newComment.trim()}
-                    className="rounded bg-zinc-700 px-3 py-1.5 text-xs text-zinc-200 hover:bg-zinc-600 disabled:opacity-40 transition-colors"
+                    className="btn-secondary flex items-center gap-1"
                   >
+                    <Send className="w-3 h-3" />
                     Post
                   </button>
                 </div>
@@ -1064,39 +1146,62 @@ export default function ProjectDetailPage() {
           {selectedShot && (
             <div className="space-y-4">
               <div>
-                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1">Shot Type</label>
-                <span className="rounded bg-zinc-800/80 px-2 py-1 text-[11px] text-zinc-400 font-mono uppercase">{selectedShot.shot.shotType}</span>
+                <label className="block text-[10px] text-virtue-text-muted uppercase tracking-wider mb-1">Shot Type</label>
+                <span className="rounded bg-[rgba(255,255,255,0.06)] px-2 py-1 text-[11px] text-virtue-text-secondary font-mono uppercase">
+                  {selectedShot.shot.shotType}
+                </span>
               </div>
               <div>
-                <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1">Prompt</label>
-                <p className="text-[13px] text-zinc-400 bg-zinc-900/60 rounded-md p-3 border border-zinc-800/40">{renderPrompt}</p>
+                <label className="block text-[10px] text-virtue-text-muted uppercase tracking-wider mb-1">Prompt</label>
+                <p className="text-[13px] text-virtue-text-secondary bg-[rgba(255,255,255,0.02)] rounded-md p-3 border border-[rgba(255,255,255,0.06)]">
+                  {renderPrompt}
+                </p>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                <div className="studio-panel p-2.5">
-                  <p className="text-[9px] text-zinc-600 uppercase">Camera</p>
-                  <p className="text-[12px] text-zinc-300 font-mono">{selectedShot.shot.cameraMove}</p>
+                <div className="glass-panel p-2.5">
+                  <p className="text-[9px] text-virtue-text-muted uppercase flex items-center gap-0.5">
+                    <Camera className="w-2.5 h-2.5" />
+                    Camera
+                  </p>
+                  <p className="text-[12px] text-virtue-text-secondary font-mono">{selectedShot.shot.cameraMove}</p>
                 </div>
-                <div className="studio-panel p-2.5">
-                  <p className="text-[9px] text-zinc-600 uppercase">Lens</p>
-                  <p className="text-[12px] text-zinc-300 font-mono">{selectedShot.shot.lens}</p>
+                <div className="glass-panel p-2.5">
+                  <p className="text-[9px] text-virtue-text-muted uppercase flex items-center gap-0.5">
+                    <Aperture className="w-2.5 h-2.5" />
+                    Lens
+                  </p>
+                  <p className="text-[12px] text-virtue-text-secondary font-mono">{selectedShot.shot.lens}</p>
                 </div>
-                <div className="studio-panel p-2.5">
-                  <p className="text-[9px] text-zinc-600 uppercase">Duration</p>
-                  <p className="text-[12px] text-zinc-300 font-mono">{selectedShot.shot.durationSec}s</p>
+                <div className="glass-panel p-2.5">
+                  <p className="text-[9px] text-virtue-text-muted uppercase flex items-center gap-0.5">
+                    <Clock className="w-2.5 h-2.5" />
+                    Duration
+                  </p>
+                  <p className="text-[12px] text-virtue-text-secondary font-mono">{selectedShot.shot.durationSec}s</p>
                 </div>
               </div>
               <button
                 onClick={() => handleSubmitRender(selectedShot.scene.id, selectedShot.shot.id)}
                 disabled={submitting}
-                className="w-full rounded-md bg-zinc-100 py-3 text-[15px] font-medium text-zinc-900 transition-colors hover:bg-white disabled:opacity-40 active:scale-[0.98] touch-manipulation"
+                className="btn-primary w-full py-3 text-[15px] active:scale-[0.98] touch-manipulation flex items-center justify-center gap-2"
               >
-                {submitting ? "Submitting..." : "Submit Render"}
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4" />
+                    Submit Render
+                  </>
+                )}
               </button>
               {renderStatus && (
                 <div className="flex items-center gap-2">
-                  <span className={`h-2 w-2 rounded-full ${renderStatus.status === "completed" ? "bg-emerald-500" : renderStatus.status === "failed" ? "bg-red-400" : "bg-blue-400 animate-pulse"}`} />
-                  <span className="text-[13px] text-zinc-400 uppercase">{renderStatus.status}</span>
-                  <span className="text-[12px] text-zinc-600 ml-auto">{renderStatus.progress}%</span>
+                  <span className={`h-2 w-2 rounded-full ${renderStatus.status === "completed" ? "bg-emerald-500" : renderStatus.status === "failed" ? "bg-red-400" : "bg-virtue-accent animate-pulse"}`} />
+                  <span className="text-[13px] text-virtue-text-secondary uppercase">{renderStatus.status}</span>
+                  <span className="text-[12px] text-virtue-text-muted ml-auto">{renderStatus.progress}%</span>
                 </div>
               )}
             </div>
@@ -1107,13 +1212,16 @@ export default function ProjectDetailPage() {
   );
 }
 
-function MiniStat({ label, value }: { label: string; value: number }) {
+function MiniStat({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) {
   return (
-    <div className="studio-panel p-3">
-      <p className="text-[10px] text-zinc-600 uppercase tracking-wider">
-        {label}
-      </p>
-      <p className="text-xl font-bold text-zinc-100 mt-0.5 tabular-nums">
+    <div className="glass-panel p-3">
+      <div className="flex items-center gap-1.5">
+        <span className="text-virtue-text-muted">{icon}</span>
+        <p className="text-[10px] text-virtue-text-muted uppercase tracking-wider">
+          {label}
+        </p>
+      </div>
+      <p className="text-xl font-bold text-virtue-text mt-0.5 tabular-nums">
         {value}
       </p>
     </div>
@@ -1123,16 +1231,21 @@ function MiniStat({ label, value }: { label: string; value: number }) {
 function ParamField({
   label,
   value,
+  icon,
   span2,
 }: {
   label: string;
   value: string;
+  icon?: React.ReactNode;
   span2?: boolean;
 }) {
   return (
     <div className={span2 ? "col-span-2" : ""}>
-      <p className="text-[10px] text-zinc-600 mb-0.5">{label}</p>
-      <p className="text-xs text-zinc-300 font-mono">{value}</p>
+      <p className="text-[10px] text-virtue-text-muted mb-0.5 flex items-center gap-1">
+        {icon}
+        {label}
+      </p>
+      <p className="text-xs text-virtue-text-secondary font-mono">{value}</p>
     </div>
   );
 }

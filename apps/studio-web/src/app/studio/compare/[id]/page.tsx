@@ -4,6 +4,13 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import {
+  GitCompare,
+  ArrowLeft,
+  Trophy,
+  Play,
+  Loader2,
+} from "lucide-react";
 import type { VirtueRenderJob, VirtueCompareSession } from "@virtue/types";
 
 export default function CompareViewPage() {
@@ -57,45 +64,57 @@ export default function CompareViewPage() {
 
   if (loading) {
     return (
-      <div className="p-8">
-        <p className="text-zinc-500 text-sm">Loading compare session...</p>
+      <div className="p-5 sm:p-8 lg:p-10 space-y-8 overflow-y-auto animate-fade-in">
+        <div className="flex items-center justify-center gap-2 py-12">
+          <Loader2 className="w-4 h-4 text-virtue-text-muted animate-spin" />
+          <p className="text-virtue-text-muted text-sm">Loading compare session...</p>
+        </div>
       </div>
     );
   }
 
   if (!session) {
     return (
-      <div className="p-8">
-        <p className="text-zinc-500 text-sm">
-          Compare session not found. Provide at least 2 render IDs.
-        </p>
-        <Link href="/renders" className="text-xs text-cyan-500 hover:text-cyan-400 mt-2 inline-block">
-          Back to Renders
-        </Link>
+      <div className="p-5 sm:p-8 lg:p-10 space-y-8 overflow-y-auto animate-fade-in">
+        <div className="glass-panel p-8 text-center">
+          <GitCompare className="w-8 h-8 text-virtue-text-muted mx-auto mb-3" />
+          <p className="text-virtue-text-muted text-sm">
+            Compare session not found. Provide at least 2 render IDs.
+          </p>
+          <Link href="/renders" className="inline-flex items-center gap-1.5 text-xs text-virtue-accent hover:text-virtue-accent/80 mt-3 transition-colors">
+            <ArrowLeft className="w-3 h-3" />
+            Back to Renders
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 space-y-6 overflow-y-auto">
+    <div className="p-5 sm:p-8 lg:p-10 space-y-8 overflow-y-auto animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <Link
             href="/renders"
-            className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs text-virtue-text-muted hover:text-virtue-text-secondary transition-colors"
           >
+            <ArrowLeft className="w-3 h-3" />
             Renders
           </Link>
-          <h1 className="text-xl font-bold tracking-tight text-zinc-100 mt-1">
-            Compare Renders
-          </h1>
-          <p className="text-xs text-zinc-600 mt-0.5 font-mono">
+          <div className="flex items-center gap-2 mt-1">
+            <GitCompare className="w-5 h-5 text-virtue-accent" />
+            <h1 className="text-xl font-bold tracking-tight text-virtue-text">
+              Compare Renders
+            </h1>
+          </div>
+          <p className="text-xs text-virtue-text-muted mt-0.5 font-mono">
             {session.id}
           </p>
         </div>
         {session.winnerId && (
-          <div className="rounded bg-emerald-950/30 border border-emerald-800/40 px-3 py-1.5">
+          <div className="rounded bg-emerald-950/30 border border-emerald-800/40 px-3 py-1.5 flex items-center gap-1.5">
+            <Trophy className="w-3 h-3 text-emerald-500" />
             <span className="text-[10px] text-emerald-500 uppercase tracking-wider font-medium">
               Winner Selected
             </span>
@@ -110,7 +129,7 @@ export default function CompareViewPage() {
           return (
             <div
               key={render.id}
-              className={`studio-panel overflow-hidden transition-all ${
+              className={`glass-panel overflow-hidden transition-all ${
                 isWinner
                   ? "ring-2 ring-emerald-500/50"
                   : session.winnerId
@@ -119,7 +138,7 @@ export default function CompareViewPage() {
               }`}
             >
               {/* Video */}
-              <div className="aspect-video bg-black relative">
+              <div className="aspect-video video-surface relative">
                 {render.output?.url ? (
                   <video
                     src={render.output.url}
@@ -131,15 +150,19 @@ export default function CompareViewPage() {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <span className={`text-xs uppercase ${
-                      render.status === "completed" ? "text-zinc-600" : "text-zinc-700"
-                    }`}>
-                      {render.status}
-                    </span>
+                    <div className="flex flex-col items-center gap-1.5">
+                      <Play className="w-5 h-5 text-virtue-text-muted" />
+                      <span className={`text-xs uppercase ${
+                        render.status === "completed" ? "text-virtue-text-muted" : "text-virtue-text-muted"
+                      }`}>
+                        {render.status}
+                      </span>
+                    </div>
                   </div>
                 )}
                 {isWinner && (
-                  <div className="absolute top-2 right-2 rounded bg-emerald-600 px-2 py-0.5 text-[9px] text-white font-medium uppercase tracking-wider">
+                  <div className="absolute top-2 right-2 rounded bg-emerald-600 px-2 py-0.5 text-[9px] text-white font-medium uppercase tracking-wider flex items-center gap-1">
+                    <Trophy className="w-2.5 h-2.5" />
                     Winner
                   </div>
                 )}
@@ -148,11 +171,11 @@ export default function CompareViewPage() {
               {/* Metadata */}
               <div className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="rounded bg-zinc-800 px-2 py-0.5 text-[10px] text-zinc-400 font-mono uppercase">
+                  <span className="rounded bg-[rgba(255,255,255,0.04)] px-2 py-0.5 text-[10px] text-virtue-text-secondary font-mono uppercase">
                     {render.provider}
                   </span>
                   <span className={`text-[10px] uppercase font-medium ${
-                    render.status === "completed" ? "text-emerald-500" : "text-zinc-600"
+                    render.status === "completed" ? "text-emerald-500" : "text-virtue-text-muted"
                   }`}>
                     {render.status}
                   </span>
@@ -160,33 +183,43 @@ export default function CompareViewPage() {
 
                 {/* Prompt */}
                 <div>
-                  <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1">
+                  <label className="section-label">
                     Prompt
                   </label>
-                  <p className="text-[11px] text-zinc-400 leading-relaxed line-clamp-4">
+                  <p className="text-[11px] text-virtue-text-secondary leading-relaxed line-clamp-4 mt-1">
                     {render.prompt}
                   </p>
                 </div>
 
                 {/* Render ID */}
                 <div>
-                  <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1">
+                  <label className="section-label">
                     Render ID
                   </label>
-                  <p className="text-[10px] text-zinc-500 font-mono">{render.id}</p>
+                  <p className="text-[10px] text-virtue-text-muted font-mono mt-1">{render.id}</p>
                 </div>
 
                 {/* Select as winner */}
                 <button
                   onClick={() => handleSelectWinner(render.id)}
                   disabled={isWinner}
-                  className={`w-full rounded-md py-2 text-xs font-medium transition-colors ${
+                  className={`w-full rounded-md py-2 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
                     isWinner
                       ? "bg-emerald-900/30 text-emerald-400 border border-emerald-800/40 cursor-default"
-                      : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700/40"
+                      : "btn-primary"
                   }`}
                 >
-                  {isWinner ? "Selected" : "Select as Winner"}
+                  {isWinner ? (
+                    <>
+                      <Trophy className="w-3 h-3" />
+                      Selected
+                    </>
+                  ) : (
+                    <>
+                      <Trophy className="w-3 h-3" />
+                      Select as Winner
+                    </>
+                  )}
                 </button>
               </div>
             </div>

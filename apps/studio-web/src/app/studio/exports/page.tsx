@@ -4,6 +4,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import type { VirtueExportJob, VirtueProject } from "@virtue/types";
+import {
+  FileVideo,
+  ArrowRight,
+  Download,
+  CheckCircle,
+  XCircle,
+  Loader2,
+  Film,
+} from "lucide-react";
 
 export default function ExportsPage() {
   const [exports, setExports] = useState<VirtueExportJob[]>([]);
@@ -28,20 +37,31 @@ export default function ExportsPage() {
   }
 
   return (
-    <div className="p-8 max-w-5xl">
-      <div className="flex items-center gap-3 mb-8">
-        <h1 className="text-xl font-bold text-zinc-100">Exports</h1>
-        <span className="rounded bg-amber-900/40 border border-amber-800/40 px-2 py-0.5 text-[9px] text-amber-400 font-mono uppercase">
-          Post-Production
-        </span>
+    <div className="p-5 sm:p-8 lg:p-10 space-y-8 max-w-5xl animate-fade-in">
+      <div className="flex items-center gap-4">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.06)]">
+          <FileVideo className="h-5 w-5 text-virtue-accent" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold text-virtue-text">Exports</h1>
+          <span className="section-label">Post-Production</span>
+        </div>
       </div>
 
       {loading ? (
-        <p className="text-sm text-zinc-500">Loading exports...</p>
+        <div className="glass-panel p-6 flex items-center justify-center gap-2">
+          <Loader2 className="h-4 w-4 text-virtue-text-muted animate-spin" />
+          <p className="text-sm text-virtue-text-muted">Loading exports...</p>
+        </div>
       ) : exports.length === 0 ? (
-        <div className="text-center py-20">
-          <p className="text-sm text-zinc-500 mb-2">No exports yet</p>
-          <p className="text-xs text-zinc-600">
+        <div className="glass-panel text-center py-20 px-6">
+          <div className="flex justify-center mb-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.06)]">
+              <Film className="h-6 w-6 text-virtue-text-muted" />
+            </div>
+          </div>
+          <p className="text-sm text-virtue-text-muted mb-2">No exports yet</p>
+          <p className="text-xs text-virtue-text-muted">
             Open a scene editor to create your first cinematic export
           </p>
         </div>
@@ -50,36 +70,37 @@ export default function ExportsPage() {
           {exports.map((job) => (
             <div
               key={job.id}
-              className="flex items-center gap-4 rounded-lg border border-zinc-800/60 bg-[#0c0c0c] p-4 hover:border-zinc-700/80 transition-all"
+              className="glass-card flex items-center gap-4 p-4 hover:border-[rgba(255,255,255,0.12)] transition-all group"
             >
               {/* Status indicator */}
-              <span
-                className={`h-3 w-3 rounded-full shrink-0 ${
-                  job.status === "completed"
-                    ? "bg-emerald-500"
-                    : job.status === "failed"
-                      ? "bg-red-400"
-                      : "bg-amber-400 animate-pulse"
-                }`}
-              />
+              <div className="shrink-0">
+                {job.status === "completed" ? (
+                  <CheckCircle className="h-4 w-4 text-emerald-500" />
+                ) : job.status === "failed" ? (
+                  <XCircle className="h-4 w-4 text-red-400" />
+                ) : (
+                  <Loader2 className="h-4 w-4 text-virtue-accent animate-spin" />
+                )}
+              </div>
 
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-zinc-200 font-medium">
+                  <span className="text-sm text-virtue-text font-medium">
                     {getProjectName(job.projectId)}
                   </span>
-                  <span className="text-zinc-700">/</span>
-                  <span className="text-sm text-zinc-400">
+                  <ArrowRight className="h-3 w-3 text-virtue-text-muted" />
+                  <span className="text-sm text-virtue-text-secondary">
                     {getSceneTitle(job.projectId, job.sceneId)}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 mt-1">
-                  <span className="text-[10px] text-zinc-600 font-mono uppercase">
+                  <span className="text-[10px] text-virtue-text-muted font-mono uppercase">
                     {job.status.replace(/_/g, " ")}
                   </span>
                   {job.output && (
-                    <span className="text-[10px] text-zinc-600 font-mono">
+                    <span className="text-[10px] text-virtue-text-muted font-mono flex items-center gap-1">
+                      <Download className="h-2.5 w-2.5" />
                       {job.output.filename}
                     </span>
                   )}
@@ -88,19 +109,19 @@ export default function ExportsPage() {
 
               {/* Progress */}
               <div className="w-24">
-                <div className="h-1.5 rounded-full bg-zinc-800">
+                <div className="h-1.5 rounded-full bg-[rgba(255,255,255,0.04)]">
                   <div
                     className={`h-1.5 rounded-full transition-all ${
                       job.status === "completed"
                         ? "bg-emerald-500"
                         : job.status === "failed"
                           ? "bg-red-500"
-                          : "bg-amber-500"
+                          : "bg-virtue-accent"
                     }`}
                     style={{ width: `${job.progress}%` }}
                   />
                 </div>
-                <span className="text-[9px] text-zinc-600 tabular-nums">
+                <span className="text-[9px] text-virtue-text-muted tabular-nums">
                   {job.progress}%
                 </span>
               </div>
@@ -108,9 +129,10 @@ export default function ExportsPage() {
               {/* Link to editor */}
               <Link
                 href={`/projects/${job.projectId}/scenes/${job.sceneId}/editor`}
-                className="text-[10px] text-zinc-500 hover:text-amber-400 uppercase tracking-wider transition-colors"
+                className="flex items-center gap-1 text-[10px] text-virtue-text-muted hover:text-virtue-accent uppercase tracking-wider transition-colors"
               >
                 Editor
+                <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
           ))}

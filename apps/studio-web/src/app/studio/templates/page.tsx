@@ -3,6 +3,26 @@
 import { useEffect, useState } from "react";
 import { api, type TemplateListItem, type AgentListItem, type AgentRunResult } from "@/lib/api";
 import { BottomSheet } from "@/components/bottom-sheet";
+import {
+  Search,
+  LayoutTemplate,
+  Bot,
+  Clock,
+  Film,
+  Camera,
+  Tag,
+  Sparkles,
+  Play,
+  Loader2,
+  ChevronRight,
+  Clapperboard,
+  Sun,
+  MapPin,
+  Move3D,
+  Lightbulb,
+  Zap,
+  Layers,
+} from "lucide-react";
 
 const CATEGORIES = [
   { value: "", label: "All" },
@@ -23,9 +43,9 @@ const DIFFICULTIES = [
 ];
 
 const difficultyColor: Record<string, string> = {
-  beginner: "bg-green-500/20 text-green-400",
-  intermediate: "bg-yellow-500/20 text-yellow-400",
-  advanced: "bg-red-500/20 text-red-400",
+  beginner: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+  intermediate: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
+  advanced: "bg-red-500/10 text-red-400 border border-red-500/20",
 };
 
 export default function TemplatesPage() {
@@ -121,39 +141,48 @@ export default function TemplatesPage() {
     : 0;
 
   return (
-    <div className="flex h-full flex-col lg:flex-row">
+    <div className="flex h-full flex-col lg:flex-row animate-fade-in">
       {/* Main content */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+      <div className="flex-1 overflow-y-auto p-5 sm:p-8 lg:p-10">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-[22px] sm:text-2xl font-bold text-white">
-            Template Library
-          </h1>
-          <p className="text-sm text-zinc-400 mt-1">
-            Browse cinematic templates and AI director agents
-          </p>
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 rounded-lg bg-virtue-accent/10">
+              <Clapperboard className="w-5 h-5 text-virtue-accent" />
+            </div>
+            <div>
+              <h1 className="text-[22px] sm:text-2xl font-bold text-virtue-text">
+                Template Library
+              </h1>
+              <p className="text-sm text-virtue-text-secondary mt-0.5">
+                Browse cinematic templates and AI director agents
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-4 bg-zinc-900 rounded-lg p-1 w-fit">
+        <div className="flex gap-1 mb-6 glass-panel p-1 w-fit">
           <button
             onClick={() => setTab("templates")}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               tab === "templates"
-                ? "bg-zinc-700 text-white"
-                : "text-zinc-400 hover:text-zinc-300"
+                ? "bg-[rgba(255,255,255,0.08)] text-virtue-text shadow-sm"
+                : "text-virtue-text-muted hover:text-virtue-text-secondary"
             }`}
           >
+            <LayoutTemplate className="w-4 h-4" />
             Templates ({total})
           </button>
           <button
             onClick={() => setTab("agents")}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               tab === "agents"
-                ? "bg-zinc-700 text-white"
-                : "text-zinc-400 hover:text-zinc-300"
+                ? "bg-[rgba(255,255,255,0.08)] text-virtue-text shadow-sm"
+                : "text-virtue-text-muted hover:text-virtue-text-secondary"
             }`}
           >
+            <Bot className="w-4 h-4" />
             AI Directors ({agents.length})
           </button>
         </div>
@@ -161,19 +190,22 @@ export default function TemplatesPage() {
         {tab === "templates" ? (
           <>
             {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-5">
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search templates..."
-                className="flex-1 rounded-lg bg-zinc-900 border border-zinc-800 px-3 py-2.5 sm:py-2 text-[14px] sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600"
-              />
+            <div className="flex flex-col sm:flex-row gap-3 mb-6">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-virtue-text-muted pointer-events-none" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search templates..."
+                  className="glass-input w-full pl-10 pr-3 py-2.5 sm:py-2 text-[14px] sm:text-sm"
+                />
+              </div>
               <div className="flex gap-2 overflow-x-auto no-scrollbar">
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="rounded-lg bg-zinc-900 border border-zinc-800 px-3 py-2.5 sm:py-2 text-[14px] sm:text-sm text-white focus:outline-none focus:border-zinc-600"
+                  className="glass-input px-3 py-2.5 sm:py-2 text-[14px] sm:text-sm"
                 >
                   {CATEGORIES.map((c) => (
                     <option key={c.value} value={c.value}>
@@ -184,7 +216,7 @@ export default function TemplatesPage() {
                 <select
                   value={difficulty}
                   onChange={(e) => setDifficulty(e.target.value)}
-                  className="rounded-lg bg-zinc-900 border border-zinc-800 px-3 py-2.5 sm:py-2 text-[14px] sm:text-sm text-white focus:outline-none focus:border-zinc-600"
+                  className="glass-input px-3 py-2.5 sm:py-2 text-[14px] sm:text-sm"
                 >
                   {DIFFICULTIES.map((d) => (
                     <option key={d.value} value={d.value}>
@@ -197,62 +229,79 @@ export default function TemplatesPage() {
 
             {/* Template grid */}
             {loading ? (
-              <div className="text-zinc-500 text-sm py-12 text-center">
-                Loading templates...
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <Loader2 className="w-6 h-6 text-virtue-accent animate-spin" />
+                <span className="text-virtue-text-muted text-sm">Loading templates...</span>
               </div>
             ) : templates.length === 0 ? (
-              <div className="text-zinc-500 text-sm py-12 text-center">
-                No templates found.
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <Film className="w-8 h-8 text-virtue-text-muted" />
+                <span className="text-virtue-text-muted text-sm">No templates found.</span>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {templates.map((t) => (
                   <button
                     key={t.id}
                     onClick={() => openDetail(t)}
-                    className="text-left rounded-xl bg-zinc-900/80 border border-zinc-800 p-4 hover:border-zinc-600 transition-colors active:scale-[0.98] touch-manipulation"
+                    className="glass-card group text-left p-4 relative overflow-hidden touch-manipulation"
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-sm font-semibold text-white leading-tight">
-                        {t.name}
-                      </h3>
-                      <span
-                        className={`text-[10px] font-medium px-2 py-0.5 rounded-full ml-2 whitespace-nowrap ${
-                          difficultyColor[t.difficulty] || ""
-                        }`}
-                      >
-                        {t.difficulty}
-                      </span>
-                    </div>
-                    <p className="text-xs text-zinc-400 line-clamp-2 mb-3">
-                      {t.description}
-                    </p>
-                    <div className="flex items-center gap-2 text-[11px] text-zinc-500">
-                      <span className="bg-zinc-800 rounded px-1.5 py-0.5">
-                        {t.category}
-                      </span>
-                      <span>{t.estimatedDuration}s</span>
-                      <span>
-                        {t.scenes.reduce((n, s) => n + s.shots.length, 0)} shots
-                      </span>
-                    </div>
-                    {t.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {t.tags.slice(0, 4).map((tag) => (
-                          <span
-                            key={tag}
-                            className="text-[10px] text-zinc-500 bg-zinc-800/50 rounded px-1.5 py-0.5"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                        {t.tags.length > 4 && (
-                          <span className="text-[10px] text-zinc-600">
-                            +{t.tags.length - 4}
-                          </span>
-                        )}
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-virtue-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+                    <div className="relative z-10">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="text-sm font-semibold text-virtue-text leading-tight">
+                          {t.name}
+                        </h3>
+                        <span
+                          className={`text-[10px] font-medium px-2 py-0.5 rounded-full ml-2 whitespace-nowrap ${
+                            difficultyColor[t.difficulty] || ""
+                          }`}
+                        >
+                          {t.difficulty}
+                        </span>
                       </div>
-                    )}
+                      <p className="text-xs text-virtue-text-secondary line-clamp-2 mb-3">
+                        {t.description}
+                      </p>
+                      <div className="flex items-center gap-2 text-[11px] text-virtue-text-muted">
+                        <span className="inline-flex items-center gap-1 bg-[rgba(255,255,255,0.04)] rounded px-1.5 py-0.5">
+                          <Tag className="w-3 h-3" />
+                          {t.category}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {t.estimatedDuration}s
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Camera className="w-3 h-3" />
+                          {t.scenes.reduce((n, s) => n + s.shots.length, 0)} shots
+                        </span>
+                      </div>
+                      {t.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2.5">
+                          {t.tags.slice(0, 4).map((tag) => (
+                            <span
+                              key={tag}
+                              className="text-[10px] text-virtue-text-muted bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)] rounded px-1.5 py-0.5"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                          {t.tags.length > 4 && (
+                            <span className="text-[10px] text-virtue-text-muted">
+                              +{t.tags.length - 4}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Reveal arrow on hover */}
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <ChevronRight className="w-4 h-4 text-virtue-accent" />
+                    </div>
                   </button>
                 ))}
               </div>
@@ -260,31 +309,42 @@ export default function TemplatesPage() {
           </>
         ) : (
           /* Agents tab */
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {agents.map((a) => (
               <button
                 key={a.id}
                 onClick={() => openAgent(a)}
-                className="text-left rounded-xl bg-zinc-900/80 border border-zinc-800 p-4 hover:border-zinc-600 transition-colors active:scale-[0.98] touch-manipulation"
+                className="glass-card group text-left p-4 relative overflow-hidden touch-manipulation"
               >
-                <h3 className="text-sm font-semibold text-white mb-1">
-                  {a.name}
-                </h3>
-                <p className="text-xs text-zinc-400 line-clamp-2 mb-3">
-                  {a.description}
-                </p>
-                <div className="flex flex-wrap gap-1">
-                  {a.capabilities.slice(0, 4).map((cap) => (
-                    <span
-                      key={cap}
-                      className="text-[10px] text-violet-400 bg-violet-500/10 rounded px-1.5 py-0.5"
-                    >
-                      {cap}
-                    </span>
-                  ))}
-                </div>
-                <div className="text-[11px] text-zinc-500 mt-2">
-                  {a.defaultTemplateIds.length} default templates
+                {/* Hover overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-virtue-accent-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+                <div className="relative z-10">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="p-1.5 rounded-md bg-virtue-accent-secondary/10">
+                      <Bot className="w-3.5 h-3.5 text-virtue-accent-secondary" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-virtue-text">
+                      {a.name}
+                    </h3>
+                  </div>
+                  <p className="text-xs text-virtue-text-secondary line-clamp-2 mb-3">
+                    {a.description}
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {a.capabilities.slice(0, 4).map((cap) => (
+                      <span
+                        key={cap}
+                        className="text-[10px] text-virtue-accent-secondary bg-virtue-accent-secondary/10 border border-virtue-accent-secondary/20 rounded px-1.5 py-0.5"
+                      >
+                        {cap}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-1 text-[11px] text-virtue-text-muted mt-2.5">
+                    <Layers className="w-3 h-3" />
+                    {a.defaultTemplateIds.length} default templates
+                  </div>
                 </div>
               </button>
             ))}
@@ -294,7 +354,7 @@ export default function TemplatesPage() {
 
       {/* Desktop detail panel */}
       {selected && (
-        <div className="hidden lg:block w-[400px] border-l border-zinc-800 overflow-y-auto p-5">
+        <div className="hidden lg:block w-[400px] border-l border-[rgba(255,255,255,0.06)] overflow-y-auto p-5 bg-[rgba(255,255,255,0.01)]">
           <TemplateDetail template={selected} totalShots={totalShots} />
         </div>
       )}
@@ -312,7 +372,7 @@ export default function TemplatesPage() {
         )}
       </BottomSheet>
 
-      {/* Agent detail / run panel (bottom sheet on all screens for simplicity) */}
+      {/* Agent detail / run panel */}
       <BottomSheet
         open={agentOpen}
         onClose={() => setAgentOpen(false)}
@@ -320,26 +380,22 @@ export default function TemplatesPage() {
       >
         {selectedAgent && (
           <div className="px-4 pb-6 space-y-4">
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-virtue-text-secondary">
               {selectedAgent.description}
             </p>
 
             <div>
-              <p className="text-[11px] uppercase tracking-wider text-zinc-500 mb-1">
-                Style
-              </p>
-              <p className="text-xs text-zinc-300">{selectedAgent.style}</p>
+              <p className="section-label mb-1">Style</p>
+              <p className="text-xs text-virtue-text-secondary">{selectedAgent.style}</p>
             </div>
 
             <div>
-              <p className="text-[11px] uppercase tracking-wider text-zinc-500 mb-1">
-                Capabilities
-              </p>
+              <p className="section-label mb-1.5">Capabilities</p>
               <div className="flex flex-wrap gap-1">
                 {selectedAgent.capabilities.map((c) => (
                   <span
                     key={c}
-                    className="text-[10px] text-violet-400 bg-violet-500/10 rounded px-1.5 py-0.5"
+                    className="text-[10px] text-virtue-accent-secondary bg-virtue-accent-secondary/10 border border-virtue-accent-secondary/20 rounded px-1.5 py-0.5"
                   >
                     {c}
                   </span>
@@ -347,62 +403,77 @@ export default function TemplatesPage() {
               </div>
             </div>
 
-            <hr className="border-zinc-800" />
+            <hr className="border-[rgba(255,255,255,0.06)]" />
 
             <div className="space-y-3">
-              <p className="text-[11px] uppercase tracking-wider text-zinc-500">
-                Run Agent
-              </p>
+              <p className="section-label">Run Agent</p>
               <input
                 type="text"
                 value={agentProjectName}
                 onChange={(e) => setAgentProjectName(e.target.value)}
                 placeholder="Project name (optional)"
-                className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3 py-2.5 text-[14px] text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600"
+                className="glass-input w-full px-3 py-2.5 text-[14px]"
               />
               <textarea
                 value={agentCustomPrompt}
                 onChange={(e) => setAgentCustomPrompt(e.target.value)}
                 placeholder="Custom direction (optional)"
                 rows={3}
-                className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3 py-2.5 text-[14px] text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 resize-none"
+                className="glass-input w-full px-3 py-2.5 text-[14px] resize-none"
               />
               <button
                 onClick={handleRunAgent}
                 disabled={agentRunning}
-                className="w-full py-2.5 rounded-lg bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-medium transition-colors touch-manipulation active:scale-[0.98]"
+                className="btn-primary w-full justify-center gap-2"
               >
-                {agentRunning ? "Running..." : "Generate Plan"}
+                {agentRunning ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Running...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    Generate Plan
+                  </>
+                )}
               </button>
             </div>
 
             {agentResult && (
               <div className="space-y-3 pt-2">
-                <hr className="border-zinc-800" />
-                <p className="text-[11px] uppercase tracking-wider text-zinc-500">
-                  Result
-                </p>
-                <div className="rounded-lg bg-zinc-900 border border-zinc-800 p-3 space-y-2">
-                  <p className="text-sm font-medium text-white">
+                <hr className="border-[rgba(255,255,255,0.06)]" />
+                <p className="section-label">Result</p>
+                <div className="glass-panel p-3 space-y-2">
+                  <p className="text-sm font-medium text-virtue-text">
                     {agentResult.projectName}
                   </p>
-                  <div className="flex gap-3 text-[11px] text-zinc-400">
-                    <span>{agentResult.scenes.length} scenes</span>
-                    <span>{agentResult.totalShots} shots</span>
-                    <span>{agentResult.estimatedDuration}s</span>
+                  <div className="flex gap-3 text-[11px] text-virtue-text-secondary">
+                    <span className="inline-flex items-center gap-1">
+                      <Film className="w-3 h-3" />
+                      {agentResult.scenes.length} scenes
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Camera className="w-3 h-3" />
+                      {agentResult.totalShots} shots
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {agentResult.estimatedDuration}s
+                    </span>
                   </div>
-                  <p className="text-xs text-zinc-500 mt-2">
+                  <p className="text-xs text-virtue-text-muted mt-2">
                     {agentResult.agentNotes}
                   </p>
                   {agentResult.scenes.map((scene, i) => (
                     <div
                       key={i}
-                      className="rounded-lg bg-zinc-800/50 p-2 mt-2"
+                      className="rounded-lg bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)] p-2.5 mt-2"
                     >
-                      <p className="text-xs font-medium text-zinc-300">
+                      <p className="text-xs font-medium text-virtue-text-secondary">
                         {scene.title}
                       </p>
-                      <p className="text-[11px] text-zinc-500">
+                      <p className="text-[11px] text-virtue-text-muted mt-0.5">
                         {scene.shots.length} shots &middot;{" "}
                         {scene.location} &middot; {scene.timeOfDay}
                       </p>
@@ -426,9 +497,9 @@ function TemplateDetail({
   totalShots: number;
 }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div>
-        <div className="flex items-center gap-2 mb-1">
+        <div className="flex items-center gap-2 mb-2">
           <span
             className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
               difficultyColor[template.difficulty] || ""
@@ -436,26 +507,36 @@ function TemplateDetail({
           >
             {template.difficulty}
           </span>
-          <span className="text-[11px] text-zinc-500 bg-zinc-800 rounded px-1.5 py-0.5">
+          <span className="inline-flex items-center gap-1 text-[11px] text-virtue-text-muted bg-[rgba(255,255,255,0.04)] rounded px-1.5 py-0.5">
+            <Tag className="w-3 h-3" />
             {template.category}
           </span>
         </div>
-        <h2 className="text-lg font-bold text-white mt-2">{template.name}</h2>
-        <p className="text-sm text-zinc-400 mt-1">{template.description}</p>
+        <h2 className="text-lg font-bold text-virtue-text mt-2">{template.name}</h2>
+        <p className="text-sm text-virtue-text-secondary mt-1">{template.description}</p>
       </div>
 
       <div className="flex gap-4 text-sm">
-        <div>
-          <p className="text-zinc-500 text-[11px]">Duration</p>
-          <p className="text-white font-medium">{template.estimatedDuration}s</p>
+        <div className="glass-panel px-3 py-2 text-center flex-1">
+          <p className="text-virtue-text-muted text-[11px] flex items-center justify-center gap-1">
+            <Clock className="w-3 h-3" />
+            Duration
+          </p>
+          <p className="text-virtue-text font-medium">{template.estimatedDuration}s</p>
         </div>
-        <div>
-          <p className="text-zinc-500 text-[11px]">Scenes</p>
-          <p className="text-white font-medium">{template.scenes.length}</p>
+        <div className="glass-panel px-3 py-2 text-center flex-1">
+          <p className="text-virtue-text-muted text-[11px] flex items-center justify-center gap-1">
+            <Film className="w-3 h-3" />
+            Scenes
+          </p>
+          <p className="text-virtue-text font-medium">{template.scenes.length}</p>
         </div>
-        <div>
-          <p className="text-zinc-500 text-[11px]">Shots</p>
-          <p className="text-white font-medium">{totalShots}</p>
+        <div className="glass-panel px-3 py-2 text-center flex-1">
+          <p className="text-virtue-text-muted text-[11px] flex items-center justify-center gap-1">
+            <Camera className="w-3 h-3" />
+            Shots
+          </p>
+          <p className="text-virtue-text font-medium">{totalShots}</p>
         </div>
       </div>
 
@@ -464,7 +545,7 @@ function TemplateDetail({
           {template.tags.map((tag) => (
             <span
               key={tag}
-              className="text-[10px] text-zinc-400 bg-zinc-800 rounded px-1.5 py-0.5"
+              className="text-[10px] text-virtue-text-secondary bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)] rounded px-1.5 py-0.5"
             >
               {tag}
             </span>
@@ -474,15 +555,14 @@ function TemplateDetail({
 
       {template.recommendedSkills.length > 0 && (
         <div>
-          <p className="text-[11px] uppercase tracking-wider text-zinc-500 mb-1">
-            Recommended Skills
-          </p>
+          <p className="section-label mb-1.5">Recommended Skills</p>
           <div className="flex flex-wrap gap-1">
             {template.recommendedSkills.map((s) => (
               <span
                 key={s}
-                className="text-[10px] text-blue-400 bg-blue-500/10 rounded px-1.5 py-0.5"
+                className="inline-flex items-center gap-1 text-[10px] text-virtue-accent bg-virtue-accent/10 border border-virtue-accent/20 rounded px-1.5 py-0.5"
               >
+                <Zap className="w-2.5 h-2.5" />
                 {s}
               </span>
             ))}
@@ -490,46 +570,58 @@ function TemplateDetail({
         </div>
       )}
 
-      <hr className="border-zinc-800" />
+      <hr className="border-[rgba(255,255,255,0.06)]" />
 
       {/* Shot list */}
       <div>
-        <p className="text-[11px] uppercase tracking-wider text-zinc-500 mb-2">
-          Shot Breakdown
-        </p>
+        <p className="section-label mb-3">Shot Breakdown</p>
         {template.scenes.map((scene, si) => (
-          <div key={si} className="mb-3">
-            <p className="text-xs font-medium text-zinc-300 mb-1">
-              {scene.title}{" "}
-              <span className="text-zinc-500 font-normal">
-                &middot; {scene.location} &middot; {scene.timeOfDay}
+          <div key={si} className="mb-4">
+            <p className="text-xs font-medium text-virtue-text-secondary mb-1.5 flex items-center gap-1.5">
+              <Play className="w-3 h-3 text-virtue-accent" />
+              {scene.title}
+              <span className="text-virtue-text-muted font-normal flex items-center gap-1">
+                &middot;
+                <MapPin className="w-3 h-3" />
+                {scene.location}
+                &middot;
+                <Sun className="w-3 h-3" />
+                {scene.timeOfDay}
               </span>
             </p>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               {scene.shots.map((shot, shi) => (
                 <div
                   key={shi}
-                  className="rounded-lg bg-zinc-900/60 border border-zinc-800/50 p-2.5"
+                  className="glass-panel p-3"
                 >
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] font-medium bg-zinc-800 text-zinc-300 rounded px-1.5 py-0.5">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-[10px] font-medium bg-[rgba(255,255,255,0.06)] text-virtue-text-secondary rounded px-1.5 py-0.5">
                       {shot.shotType}
                     </span>
-                    <span className="text-[10px] text-zinc-500">
+                    <span className="inline-flex items-center gap-0.5 text-[10px] text-virtue-text-muted">
+                      <Clock className="w-2.5 h-2.5" />
                       {shot.durationSec}s
                     </span>
-                    <span className="text-[10px] text-zinc-500">
+                    <span className="inline-flex items-center gap-0.5 text-[10px] text-virtue-text-muted">
+                      <Camera className="w-2.5 h-2.5" />
                       {shot.lens}
                     </span>
                   </div>
-                  <p className="text-xs text-zinc-400">{shot.description}</p>
-                  <p className="text-[11px] text-zinc-600 mt-1 line-clamp-2">
+                  <p className="text-xs text-virtue-text-secondary">{shot.description}</p>
+                  <p className="text-[11px] text-virtue-text-muted mt-1 line-clamp-2">
                     {shot.prompt}
                   </p>
-                  <div className="flex items-center gap-2 mt-1 text-[10px] text-zinc-500">
-                    <span>{shot.cameraMove}</span>
+                  <div className="flex items-center gap-2 mt-1.5 text-[10px] text-virtue-text-muted">
+                    <span className="inline-flex items-center gap-0.5">
+                      <Move3D className="w-2.5 h-2.5" />
+                      {shot.cameraMove}
+                    </span>
                     <span>&middot;</span>
-                    <span>{shot.lighting}</span>
+                    <span className="inline-flex items-center gap-0.5">
+                      <Lightbulb className="w-2.5 h-2.5" />
+                      {shot.lighting}
+                    </span>
                   </div>
                 </div>
               ))}
