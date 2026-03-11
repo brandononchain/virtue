@@ -123,7 +123,7 @@ export default function SceneTimelinePage() {
   if (!project || !scene) {
     return (
       <div className="p-4 sm:p-8">
-        <p className="text-zinc-500 text-sm">Loading scene timeline...</p>
+        <p className="text-virtue-text-muted text-sm">Loading scene timeline...</p>
       </div>
     );
   }
@@ -139,27 +139,27 @@ export default function SceneTimelinePage() {
   const composeContent = (
     <div className="space-y-5">
       <div>
-        <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">Scene</label>
-        <p className="text-[14px] sm:text-sm text-zinc-300">{scene.title}</p>
-        {scene.description && <p className="text-[13px] sm:text-xs text-zinc-500 mt-1">{scene.description}</p>}
+        <label className="section-label">Scene</label>
+        <p className="text-[14px] sm:text-sm text-virtue-text-secondary">{scene.title}</p>
+        {scene.description && <p className="text-[13px] sm:text-xs text-virtue-text-muted mt-1">{scene.description}</p>}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="studio-panel p-3">
-          <p className="text-[9px] text-zinc-600 uppercase">Shots</p>
-          <p className="text-lg font-bold text-zinc-100 tabular-nums">{timeline?.shots.length || 0}</p>
+        <div className="glass-panel p-3">
+          <p className="text-[9px] text-virtue-text-muted uppercase">Shots</p>
+          <p className="text-lg font-bold text-virtue-text tabular-nums">{timeline?.shots.length || 0}</p>
         </div>
-        <div className="studio-panel p-3">
-          <p className="text-[9px] text-zinc-600 uppercase">Duration</p>
-          <p className="text-lg font-bold text-zinc-100 tabular-nums">{(timeline?.totalDuration || 0).toFixed(1)}s</p>
+        <div className="glass-panel p-3">
+          <p className="text-[9px] text-virtue-text-muted uppercase">Duration</p>
+          <p className="text-lg font-bold text-virtue-text tabular-nums">{(timeline?.totalDuration || 0).toFixed(1)}s</p>
         </div>
-        <div className="studio-panel p-3">
-          <p className="text-[9px] text-zinc-600 uppercase">Rendered</p>
-          <p className="text-lg font-bold text-zinc-100 tabular-nums">{renderedCount}</p>
+        <div className="glass-panel p-3">
+          <p className="text-[9px] text-virtue-text-muted uppercase">Rendered</p>
+          <p className="text-lg font-bold text-virtue-text tabular-nums">{renderedCount}</p>
         </div>
-        <div className="studio-panel p-3">
-          <p className="text-[9px] text-zinc-600 uppercase">Ready</p>
-          <p className={`text-lg font-bold tabular-nums ${allRendered ? "text-emerald-400" : "text-zinc-500"}`}>
+        <div className="glass-panel p-3">
+          <p className="text-[9px] text-virtue-text-muted uppercase">Ready</p>
+          <p className={`text-lg font-bold tabular-nums ${allRendered ? "text-emerald-400" : "text-virtue-text-muted"}`}>
             {allRendered ? "Yes" : "No"}
           </p>
         </div>
@@ -168,20 +168,20 @@ export default function SceneTimelinePage() {
       <button
         onClick={handleCompose}
         disabled={!allRendered || composing}
-        className="w-full rounded-md bg-zinc-100 py-3 text-[15px] sm:text-sm font-medium text-zinc-900 transition-colors hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.98] touch-manipulation"
+        className="btn-primary w-full py-3 text-[15px] sm:text-sm font-medium active:scale-[0.98] touch-manipulation"
       >
         {composing ? "Composing..." : allRendered ? "Compose Scene" : "Render all shots first"}
       </button>
 
       {!allRendered && timeline && timeline.shots.length > 0 && (
-        <p className="text-[12px] sm:text-[10px] text-zinc-600 text-center">
+        <p className="text-[12px] sm:text-[10px] text-virtue-text-muted text-center">
           {timeline.shots.length - renderedCount} shot{timeline.shots.length - renderedCount !== 1 ? "s" : ""} still need rendering
         </p>
       )}
 
       {composeJob && (
         <div>
-          <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">Composition Status</label>
+          <label className="section-label">Composition Status</label>
           <div className="flex items-center gap-2 mb-1.5">
             <span className={`h-2 w-2 rounded-full shrink-0 ${
               composeJob.status === "completed" ? "bg-emerald-500" : composeJob.status === "failed" ? "bg-red-400" : "bg-blue-400 animate-pulse"
@@ -191,9 +191,9 @@ export default function SceneTimelinePage() {
             }`}>
               {composeJob.status}
             </span>
-            <span className="text-xs text-zinc-600 ml-auto tabular-nums">{composeJob.progress}%</span>
+            <span className="text-xs text-virtue-text-muted ml-auto tabular-nums">{composeJob.progress}%</span>
           </div>
-          <div className="h-2 sm:h-1.5 rounded-full bg-zinc-800">
+          <div className="h-2 sm:h-1.5 rounded-full bg-[rgba(255,255,255,0.04)]">
             <div
               className={`h-full rounded-full transition-all duration-500 ${
                 composeJob.status === "completed" ? "bg-emerald-500" : composeJob.status === "failed" ? "bg-red-500" : "bg-blue-500"
@@ -207,13 +207,13 @@ export default function SceneTimelinePage() {
 
       {composeJob?.output && composeJob.status === "completed" && (
         <div>
-          <label className="block text-[10px] text-zinc-600 uppercase tracking-wider mb-1.5">Scene Output</label>
-          <div className="rounded-lg overflow-hidden border border-zinc-800/60 bg-black">
+          <label className="section-label">Scene Output</label>
+          <div className="rounded-lg overflow-hidden border border-[rgba(255,255,255,0.06)] bg-black">
             <video src={composeJob.output.url} controls autoPlay loop muted playsInline className="w-full aspect-video" />
           </div>
           <div className="mt-2 space-y-1">
-            <p className="text-[11px] text-zinc-500 font-mono truncate">{composeJob.output.filename}</p>
-            <p className="text-[10px] text-zinc-600 font-mono truncate">{composeJob.output.url}</p>
+            <p className="text-[11px] text-virtue-text-muted font-mono truncate">{composeJob.output.filename}</p>
+            <p className="text-[10px] text-virtue-text-muted font-mono truncate">{composeJob.output.url}</p>
           </div>
         </div>
       )}
@@ -223,42 +223,42 @@ export default function SceneTimelinePage() {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-zinc-800/60 px-4 sm:px-6 py-3 bg-[#080808]">
+      <div className="flex items-center justify-between border-b border-[rgba(255,255,255,0.06)] px-4 sm:px-6 py-3 bg-virtue-bg">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <Link
             href={`/projects/${projectId}`}
-            className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors shrink-0 min-h-[44px] flex items-center"
+            className="text-xs text-virtue-text-muted hover:text-virtue-text-secondary transition-colors shrink-0 min-h-[44px] flex items-center"
           >
             <span className="hidden sm:inline">{project.name}</span>
             <svg viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 sm:hidden">
               <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
             </svg>
           </Link>
-          <span className="text-zinc-700 hidden sm:inline">/</span>
-          <h1 className="text-sm font-semibold text-zinc-200 truncate">{scene.title}</h1>
-          <span className="rounded bg-zinc-800 px-2 py-0.5 text-[9px] text-zinc-500 font-mono uppercase hidden sm:inline">Timeline</span>
+          <span className="text-virtue-text-muted hidden sm:inline">/</span>
+          <h1 className="text-sm font-semibold text-virtue-text truncate">{scene.title}</h1>
+          <span className="rounded bg-[rgba(255,255,255,0.04)] px-2 py-0.5 text-[9px] text-virtue-text-muted font-mono uppercase hidden sm:inline">Timeline</span>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <Link
             href={`/projects/${projectId}/scenes/${sceneId}/editor`}
-            className="rounded-md bg-amber-600/90 px-3 py-2 sm:py-1 text-[11px] sm:text-[10px] font-semibold text-white uppercase tracking-wider hover:bg-amber-500 transition-colors touch-manipulation"
+            className="rounded-md bg-virtue-accent px-3 py-2 sm:py-1 text-[11px] sm:text-[10px] font-semibold text-white uppercase tracking-wider hover:bg-virtue-accent/90 transition-colors touch-manipulation"
           >
             Editor
           </Link>
           <button
             onClick={refreshTimeline}
-            className="text-[10px] text-zinc-500 hover:text-zinc-300 uppercase tracking-wider transition-colors min-h-[44px] flex items-center"
+            className="text-[10px] text-virtue-text-muted hover:text-virtue-text-secondary uppercase tracking-wider transition-colors min-h-[44px] flex items-center"
           >
             Refresh
           </button>
           {/* Compose button — mobile */}
           <button
             onClick={() => setShowCompose(true)}
-            className="lg:hidden rounded-md border border-zinc-700 px-3 py-2 text-[11px] text-zinc-300 font-medium touch-manipulation"
+            className="lg:hidden rounded-md border border-[rgba(255,255,255,0.08)] px-3 py-2 text-[11px] text-virtue-text-secondary font-medium touch-manipulation"
           >
             Compose
           </button>
-          <span className="text-[10px] text-zinc-600 tabular-nums hidden sm:inline">
+          <span className="text-[10px] text-virtue-text-muted tabular-nums hidden sm:inline">
             {renderedCount}/{timeline?.shots.length || 0} rendered
           </span>
         </div>
@@ -267,14 +267,14 @@ export default function SceneTimelinePage() {
       <div className="flex flex-1 overflow-hidden">
         {/* Timeline panel */}
         <div className="flex-1 overflow-y-auto">
-          <div className="sticky top-0 z-10 border-b border-zinc-800/40 bg-[#0a0a0a] px-4 sm:px-6 py-2">
+          <div className="sticky top-0 z-10 border-b border-[rgba(255,255,255,0.04)] bg-virtue-bg px-4 sm:px-6 py-2">
             <div className="flex items-center gap-2">
-              <span className="text-[9px] text-zinc-600 font-mono uppercase tracking-widest">Scene Timeline</span>
-              <div className="flex-1 h-px bg-zinc-800/60" />
-              {scene.location && <span className="text-[9px] text-zinc-700 hidden sm:inline">{scene.location}</span>}
-              {scene.mood && <span className="text-[9px] text-zinc-700 hidden sm:inline">{scene.mood}</span>}
+              <span className="text-[9px] text-virtue-text-muted font-mono uppercase tracking-widest">Scene Timeline</span>
+              <div className="flex-1 h-px bg-[rgba(255,255,255,0.06)]" />
+              {scene.location && <span className="text-[9px] text-virtue-text-muted hidden sm:inline">{scene.location}</span>}
+              {scene.mood && <span className="text-[9px] text-virtue-text-muted hidden sm:inline">{scene.mood}</span>}
               {/* Mobile stats */}
-              <span className="text-[9px] text-zinc-600 tabular-nums sm:hidden">
+              <span className="text-[9px] text-virtue-text-muted tabular-nums sm:hidden">
                 {renderedCount}/{timeline?.shots.length || 0}
               </span>
             </div>
@@ -284,8 +284,8 @@ export default function SceneTimelinePage() {
           <div className="px-4 sm:px-6 py-4 space-y-1.5 sm:space-y-1">
             {(!timeline || timeline.shots.length === 0) && (
               <div className="text-center py-16">
-                <p className="text-sm text-zinc-600">No shots in this scene yet.</p>
-                <Link href={`/projects/${projectId}`} className="text-xs text-zinc-500 hover:text-zinc-300 mt-2 inline-block transition-colors">
+                <p className="text-sm text-virtue-text-muted">No shots in this scene yet.</p>
+                <Link href={`/projects/${projectId}`} className="text-xs text-virtue-text-muted hover:text-virtue-text-secondary mt-2 inline-block transition-colors">
                   Add shots in the project view
                 </Link>
               </div>
@@ -309,66 +309,66 @@ export default function SceneTimelinePage() {
                   className={`
                     group rounded border transition-all cursor-grab active:cursor-grabbing touch-manipulation
                     ${isDragging ? "opacity-40 scale-[0.98]" : ""}
-                    ${isDropTarget && !isDragging ? "border-zinc-500" : "border-zinc-800/60"}
-                    ${hasAsset ? "bg-[#0c0c0c]" : "bg-[#0a0a0a]"}
-                    hover:border-zinc-700/80
+                    ${isDropTarget && !isDragging ? "border-virtue-accent/50" : "border-[rgba(255,255,255,0.06)]"}
+                    ${hasAsset ? "bg-virtue-surface" : "bg-virtue-bg"}
+                    hover:border-[rgba(255,255,255,0.1)]
                     flex flex-col sm:flex-row sm:items-stretch
                   `}
                 >
                   {/* Index + duration */}
-                  <div className="flex sm:flex-col items-center justify-between sm:justify-center w-full sm:w-14 shrink-0 border-b sm:border-b-0 sm:border-r border-zinc-800/40 px-4 sm:px-0 py-2 sm:py-3">
+                  <div className="flex sm:flex-col items-center justify-between sm:justify-center w-full sm:w-14 shrink-0 border-b sm:border-b-0 sm:border-r border-[rgba(255,255,255,0.04)] px-4 sm:px-0 py-2 sm:py-3">
                     <div className="flex sm:flex-col items-center gap-2 sm:gap-0">
-                      <span className="text-[10px] text-zinc-600 font-mono tabular-nums">{String(index + 1).padStart(2, "0")}</span>
-                      <span className="text-[9px] text-zinc-700 font-mono sm:mt-1 tabular-nums">{tShot.duration}s</span>
+                      <span className="text-[10px] text-virtue-text-muted font-mono tabular-nums">{String(index + 1).padStart(2, "0")}</span>
+                      <span className="text-[9px] text-virtue-text-muted font-mono sm:mt-1 tabular-nums">{tShot.duration}s</span>
                     </div>
-                    <span className={`h-2 w-2 rounded-full shrink-0 sm:hidden ${hasAsset ? "bg-emerald-500" : "bg-zinc-600"}`} />
+                    <span className={`h-2 w-2 rounded-full shrink-0 sm:hidden ${hasAsset ? "bg-emerald-500" : "bg-virtue-text-muted"}`} />
                   </div>
 
                   {/* Shot info */}
                   <div className="flex-1 min-w-0 py-3 px-4">
                     <div className="flex items-center gap-2 mb-1.5">
-                      <span className={`h-2 w-2 rounded-full shrink-0 hidden sm:block ${hasAsset ? "bg-emerald-500" : "bg-zinc-600"}`} />
+                      <span className={`h-2 w-2 rounded-full shrink-0 hidden sm:block ${hasAsset ? "bg-emerald-500" : "bg-virtue-text-muted"}`} />
                       {shot && (
-                        <span className="rounded bg-zinc-800/80 px-1.5 py-0.5 text-[8px] text-zinc-500 font-mono uppercase shrink-0">
+                        <span className="rounded bg-[rgba(255,255,255,0.04)] px-1.5 py-0.5 text-[8px] text-virtue-text-muted font-mono uppercase shrink-0">
                           {shot.shotType}
                         </span>
                       )}
-                      <span className="text-[13px] sm:text-xs text-zinc-400 truncate">
+                      <span className="text-[13px] sm:text-xs text-virtue-text-secondary truncate">
                         {shot?.description || tShot.shotId}
                       </span>
                     </div>
 
                     {/* Timeline bar — desktop only */}
-                    <div className="hidden sm:block relative h-6 rounded bg-zinc-900 overflow-hidden">
+                    <div className="hidden sm:block relative h-6 rounded bg-[rgba(255,255,255,0.02)] overflow-hidden">
                       <div
                         className={`absolute inset-y-0 left-0 rounded ${
-                          hasAsset ? "bg-emerald-900/40 border border-emerald-800/40" : "bg-zinc-800/60 border border-zinc-700/30"
+                          hasAsset ? "bg-emerald-900/40 border border-emerald-800/40" : "bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)]"
                         }`}
                         style={{ width: `${Math.min(100, (tShot.duration / (timeline?.totalDuration || 1)) * 100 * 2.5)}%` }}
                       >
                         <div className="flex items-center h-full px-2 gap-2">
-                          {shot && <span className="text-[8px] text-zinc-500 font-mono truncate">{shot.cameraMove} · {shot.lens}</span>}
+                          {shot && <span className="text-[8px] text-virtue-text-muted font-mono truncate">{shot.cameraMove} · {shot.lens}</span>}
                         </div>
                       </div>
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] text-zinc-700 font-mono tabular-nums">
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] text-virtue-text-muted font-mono tabular-nums">
                         {formatTimecode(tShot.startTime)} — {formatTimecode(tShot.startTime + tShot.duration)}
                       </span>
                     </div>
 
                     {/* Mobile meta */}
                     <div className="sm:hidden flex items-center gap-2 mt-1">
-                      {shot && <span className="text-[11px] text-zinc-600 font-mono">{shot.cameraMove} · {shot.lens}</span>}
+                      {shot && <span className="text-[11px] text-virtue-text-muted font-mono">{shot.cameraMove} · {shot.lens}</span>}
                     </div>
                   </div>
 
                   {/* Render status — desktop */}
-                  <div className="hidden sm:flex items-center justify-center w-24 shrink-0 border-l border-zinc-800/40 px-2">
+                  <div className="hidden sm:flex items-center justify-center w-24 shrink-0 border-l border-[rgba(255,255,255,0.04)] px-2">
                     {hasAsset ? (
                       <span className="text-[9px] text-emerald-500 font-mono uppercase">Rendered</span>
                     ) : render ? (
                       <span className="text-[9px] text-blue-400 font-mono uppercase">{render.status}</span>
                     ) : (
-                      <span className="text-[9px] text-zinc-600 font-mono uppercase">Pending</span>
+                      <span className="text-[9px] text-virtue-text-muted font-mono uppercase">Pending</span>
                     )}
                   </div>
                 </div>
@@ -378,9 +378,9 @@ export default function SceneTimelinePage() {
         </div>
 
         {/* Desktop compose panel */}
-        <div className="hidden lg:block w-80 border-l border-zinc-800/60 bg-[#080808] overflow-y-auto shrink-0">
-          <div className="px-5 py-4 border-b border-zinc-800/60">
-            <h2 className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">Scene Composition</h2>
+        <div className="hidden lg:block w-80 border-l border-[rgba(255,255,255,0.06)] bg-virtue-bg overflow-y-auto shrink-0">
+          <div className="px-5 py-4 border-b border-[rgba(255,255,255,0.06)]">
+            <h2 className="text-[10px] font-semibold text-virtue-text-muted uppercase tracking-wider">Scene Composition</h2>
           </div>
           <div className="p-5">{composeContent}</div>
         </div>
