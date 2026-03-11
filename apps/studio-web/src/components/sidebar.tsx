@@ -181,6 +181,28 @@ export function Sidebar() {
           </Link>
         </div>
 
+        {/* Library Section */}
+        <div className="mt-4 pt-3 border-t border-zinc-800/40">
+          <p className="px-3 mb-2 text-[9px] text-zinc-600 uppercase tracking-widest font-semibold">
+            Library
+          </p>
+          <Link
+            href="/studio/templates"
+            className={`flex items-center gap-3 rounded-md px-3 py-2 text-[13px] transition-colors ${
+              pathname.startsWith("/studio/templates")
+                ? "bg-zinc-800/60 text-zinc-100 font-medium"
+                : "text-zinc-500 hover:bg-zinc-800/30 hover:text-zinc-300"
+            }`}
+          >
+            <span className="w-4 h-4 shrink-0 opacity-70">
+              <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+                <path d="M1 3.5A1.5 1.5 0 012.5 2h11A1.5 1.5 0 0115 3.5v2A1.5 1.5 0 0113.5 7h-11A1.5 1.5 0 011 5.5v-2zm0 7A1.5 1.5 0 012.5 9h11a1.5 1.5 0 011.5 1.5v2a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12.5v-2z" />
+              </svg>
+            </span>
+            Templates
+          </Link>
+        </div>
+
         {/* Continuity Section */}
         <div className="mt-4 pt-3 border-t border-zinc-800/40">
           <p className="px-3 mb-2 text-[9px] text-zinc-600 uppercase tracking-widest font-semibold">

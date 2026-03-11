@@ -11,6 +11,7 @@ import { routingRoutes } from "./routes/routing";
 import { reviewRoutes } from "./routes/review";
 import { autonomousRoutes } from "./routes/autonomous";
 import { simulationRoutes } from "./routes/simulation";
+import { templateRoutes } from "./routes/templates";
 import { store } from "./services/store";
 
 export const app = new Hono();
@@ -58,3 +59,4 @@ app.route("/api/routing", routingRoutes);
 app.route("/api/review", reviewRoutes);
 app.route("/api/autonomous", autonomousRoutes);
 app.route("/api/simulation", simulationRoutes);
+app.route("/api/templates", templateRoutes);

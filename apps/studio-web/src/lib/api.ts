@@ -47,6 +47,59 @@ interface ResolvedContext {
   };
 }
 
+// Template Library types (lightweight client-side representations)
+export interface TemplateShotItem {
+  shotType: string;
+  description: string;
+  prompt: string;
+  cameraMove: string;
+  lens: string;
+  lighting: string;
+  durationSec: number;
+  skills: string[];
+}
+
+export interface TemplateSceneItem {
+  title: string;
+  description: string;
+  location: string;
+  timeOfDay: string;
+  mood: string;
+  shots: TemplateShotItem[];
+}
+
+export interface TemplateListItem {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  tags: string[];
+  estimatedDuration: number;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  recommendedSkills: string[];
+  scenes: TemplateSceneItem[];
+}
+
+export type TemplateDetail = TemplateListItem;
+
+export interface AgentListItem {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  capabilities: string[];
+  defaultTemplateIds: string[];
+  style: string;
+}
+
+export interface AgentRunResult {
+  projectName: string;
+  scenes: TemplateSceneItem[];
+  totalShots: number;
+  estimatedDuration: number;
+  agentNotes: string;
+}
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 async function request<T>(path: string, opts?: RequestInit): Promise<T> {
@@ -517,6 +570,34 @@ export const api = {
     ),
   addStoryEvent: (projectId: string, data: { sceneId?: string; description: string; affectedCharacters?: string[]; affectedEnvironments?: string[]; affectedProps?: string[] }) =>
     request<VirtueWorldState>(`/api/simulation/world/${projectId}/event`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  // ─── Template Library ───────────────────────────────────
+
+  listTemplates: (params?: { category?: string; difficulty?: string; q?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.category) qs.set("category", params.category);
+    if (params?.difficulty) qs.set("difficulty", params.difficulty);
+    if (params?.q) qs.set("q", params.q);
+    const query = qs.toString();
+    return request<{ templates: TemplateListItem[]; total: number }>(
+      `/api/templates${query ? `?${query}` : ""}`,
+    );
+  },
+  getTemplate: (id: string) =>
+    request<TemplateDetail>(`/api/templates/${id}`),
+  getTemplateCategories: () =>
+    request<{ categories: string[] }>("/api/templates/categories"),
+  getTemplateTags: () =>
+    request<{ tags: string[] }>("/api/templates/tags"),
+  listAgents: () =>
+    request<{ agents: AgentListItem[] }>("/api/templates/agents"),
+  getAgent: (id: string) =>
+    request<AgentListItem>(`/api/templates/agents/${id}`),
+  runAgent: (data: { agentId: string; templateId?: string; projectName?: string; customPrompt?: string }) =>
+    request<AgentRunResult>("/api/templates/agents/run", {
       method: "POST",
       body: JSON.stringify(data),
     }),
