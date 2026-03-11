@@ -65,6 +65,9 @@ importers:
       '@virtue/storyboard-engine':
         specifier: workspace:*
         version: link:../../packages/storyboard-engine
+      '@virtue/template-library':
+        specifier: workspace:*
+        version: link:../../packages/template-library
       '@virtue/timeline-engine':
         specifier: workspace:*
         version: link:../../packages/timeline-engine
@@ -322,6 +325,16 @@ importers:
       '@virtue/validation':
         specifier: workspace:*
         version: link:../validation
+    devDependencies:
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
+  packages/template-library:
+    dependencies:
+      '@virtue/types':
+        specifier: workspace:*
+        version: link:../types
     devDependencies:
       typescript:
         specifier: ^5.5.0
